@@ -10,19 +10,19 @@ import net.minecraft.command.Commands;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
-public class OOCCommand {
+public class PartyCommand {
     public static LiteralArgumentBuilder<CommandSource> register() {
-        return Commands.literal("ooc").then(Commands.argument("msg", StringArgumentType.greedyString())
-                .executes(OOCCommand::handleMessage));
+        return Commands.literal("p").then(Commands.argument("msg", StringArgumentType.greedyString())
+                .executes(PartyCommand::handleMessage));
     }
 
     static int handleMessage(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         String msg = StringArgumentType.getString(ctx, "msg");
-        StringTextComponent oocMessage = new StringTextComponent(String.format("[OOC]<%s>: %s",
+        StringTextComponent msgComp = new StringTextComponent(String.format("[Party]<%s>: %s",
                 ctx.getSource().asPlayer().getName().getFormattedText(), msg));
-        oocMessage.applyTextStyle(TextFormatting.DARK_GREEN);
-        ctx.getSource().getServer().getPlayerList().sendMessage(oocMessage, false);
+        msgComp.applyTextStyle(TextFormatting.DARK_AQUA);
+        ctx.getSource().asPlayer().sendMessage(msgComp);
+        ctx.getSource().getServer().getPlayerList().sendMessageToAllTeamMembers(ctx.getSource().asPlayer(), msgComp);
         return Command.SINGLE_SUCCESS;
     }
-
 }

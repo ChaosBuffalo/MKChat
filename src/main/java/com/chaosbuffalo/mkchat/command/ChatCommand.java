@@ -8,5 +8,6 @@ public class ChatCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(OOCCommand.register());
         dispatcher.register(DimCommand.register());
+        dispatcher.register(PartyCommand.register());
     }
 }

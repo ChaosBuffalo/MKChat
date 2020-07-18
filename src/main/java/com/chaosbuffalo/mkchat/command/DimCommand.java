@@ -20,7 +20,7 @@ public class DimCommand {
 
     static int handleMessage(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         String msg = StringArgumentType.getString(ctx, "msg");
-        StringTextComponent compMessage = new StringTextComponent(String.format("<%s>: %s",
+        StringTextComponent compMessage = new StringTextComponent(String.format("[Dim]<%s>: %s",
                 ctx.getSource().asPlayer().getName().getFormattedText(), msg));
         compMessage.applyTextStyle(TextFormatting.GOLD);
         // emulate sendMessage but only to players in the dimension
