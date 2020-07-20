@@ -2,6 +2,7 @@ package com.chaosbuffalo.mkchat.dialogue;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nullable;
@@ -10,21 +11,19 @@ import java.util.Map;
 import java.util.UUID;
 
 public class DialogueTree {
-    private final String dialogueName;
-    private final Map<UUID, DialogueNode> nodes;
-    private final Map<UUID, DialoguePrompt> prompts;
+    private final ResourceLocation dialogueName;
+    private final Map<String, DialogueNode> nodes;
+    private final Map<String, DialoguePrompt> prompts;
     private DialogueNode startNode;
 
-    public DialogueTree(String dialogueName){
+    public DialogueTree(ResourceLocation dialogueName){
         this.dialogueName = dialogueName;
         this.nodes = new HashMap<>();
         this.prompts = new HashMap<>();
     }
 
-    public DialogueNode addNode(ITextComponent message){
-        DialogueNode newNode = new DialogueNode(UUID.randomUUID(), message);
-        nodes.put(newNode.getNodeId(), newNode);
-        return newNode;
+    public void addNode(DialogueNode node){
+        nodes.put(node.getNodeId(), node);
     }
 
     public void setStartNode(DialogueNode startNode) {
@@ -36,11 +35,10 @@ public class DialogueTree {
         return startNode;
     }
 
-    public DialoguePrompt addPrompt(String promptPhrase, String defaultPromptText){
-        DialoguePrompt prompt = new DialoguePrompt(UUID.randomUUID(), promptPhrase, defaultPromptText);
+    public void addPrompt(DialoguePrompt prompt){
         prompts.put(prompt.getPromptId(), prompt);
-        return prompt;
     }
+
 
     public void handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker){
         for (DialoguePrompt prompt : prompts.values()){

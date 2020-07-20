@@ -6,15 +6,14 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class DialogueNode {
-    private final UUID nodeId;
+    private final String nodeId;
     private final ITextComponent message;
     private Consumer<ServerPlayerEntity> callback;
 
-    public DialogueNode(UUID nodeId, ITextComponent message){
+    public DialogueNode(String nodeId, ITextComponent message){
         this.nodeId = nodeId;
         this.message = message;
         this.callback = null;
@@ -38,7 +37,7 @@ public class DialogueNode {
         return callback;
     }
 
-    public UUID getNodeId() {
+    public String getNodeId() {
         return nodeId;
     }
 

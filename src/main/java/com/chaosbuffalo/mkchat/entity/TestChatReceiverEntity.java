@@ -4,7 +4,6 @@ import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
-import com.chaosbuffalo.mkchat.dialogue.PromptString;
 import com.chaosbuffalo.mkchat.init.ChatEntityTypes;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.*;
@@ -13,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -28,16 +28,20 @@ public class TestChatReceiverEntity extends PigEntity implements IPlayerChatRece
     }
 
     protected DialogueComponent createDialogueComponent(){
-        DialogueTree dialogueTree = new DialogueTree("testReceiver");
+        DialogueTree dialogueTree = new DialogueTree(new ResourceLocation("mkchat", "test_receiver"));
         ITextComponent msg = new StringTextComponent("Hello, do you ");
-        DialoguePrompt testPrompt = dialogueTree.addPrompt("need xp", "I need xp.");
-        PromptString promptString = new PromptString(testPrompt, "need some xp?");
-        msg.appendSibling(promptString.getTextComponent());
-        DialogueNode rootNode = dialogueTree.addNode(msg);
+        DialoguePrompt testPrompt = new DialoguePrompt("need_xp", "need xp",
+                "I need xp.");
+        dialogueTree.addPrompt(testPrompt);
+        msg.appendSibling(testPrompt.getTextComponent());
+        DialogueNode rootNode = new DialogueNode("root", msg);
+        dialogueTree.addNode(rootNode);
         dialogueTree.setStartNode(rootNode);
-        DialogueNode responseNode = dialogueTree.addNode(new StringTextComponent("Here is 1 level."));
+        DialogueNode responseNode = new DialogueNode("grant_level",
+                new StringTextComponent("Here is 1 level."));
         responseNode.setCallback((player) -> player.addExperienceLevel(1));
         testPrompt.setResultNode(responseNode);
+        dialogueTree.addNode(responseNode);
         return new DialogueComponent(this, dialogueTree);
     }
 
