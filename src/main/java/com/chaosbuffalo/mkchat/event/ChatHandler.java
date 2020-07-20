@@ -2,7 +2,6 @@ package com.chaosbuffalo.mkchat.event;
 
 import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.entity.IPlayerChatReceiver;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SChatPacket;
