@@ -1,10 +1,12 @@
 package com.chaosbuffalo.mkchat.entity;
 
 import com.chaosbuffalo.mkchat.MKChat;
+import com.chaosbuffalo.mkchat.dialogue.ContextStringTextComponent;
 import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
 import com.chaosbuffalo.mkchat.init.ChatEntityTypes;
+import com.google.common.collect.Lists;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.PigEntity;
@@ -29,11 +31,14 @@ public class TestChatReceiverEntity extends PigEntity implements IPlayerChatRece
 
     protected DialogueComponent createDialogueComponent(){
         DialogueTree dialogueTree = new DialogueTree(new ResourceLocation("mkchat", "test_receiver"));
-        ITextComponent msg = new StringTextComponent("Hello, do you ");
+        ITextComponent msg = new ContextStringTextComponent("Hello %s, I am %s. Do you ", (context ->
+                Lists.newArrayList(context.getPlayer().getName().getFormattedText(),
+                        context.getSpeaker().getName().getFormattedText())));
         DialoguePrompt testPrompt = new DialoguePrompt("need_xp", "need xp",
                 "I need xp.");
         dialogueTree.addPrompt(testPrompt);
-        msg.appendSibling(testPrompt.getTextComponent());
+        msg.appendSibling(testPrompt.getPromptLink("need some xp"));
+        msg.appendSibling(new StringTextComponent("?"));
         DialogueNode rootNode = new DialogueNode("root", msg);
         dialogueTree.addNode(rootNode);
         dialogueTree.setStartNode(rootNode);

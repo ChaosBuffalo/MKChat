@@ -51,8 +51,8 @@ public class DialoguePrompt {
 
     }
 
-    public ITextComponent getTextComponent() {
-        ITextComponent textComponent = new StringTextComponent(String.format("[%s]", getPromptPhrase()));
+    public ITextComponent getPromptLink(String text) {
+        ITextComponent textComponent = new StringTextComponent(String.format("[%s]", text));
         textComponent.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                 getDefaultPromptText()));
         textComponent.getStyle().setColor(TextFormatting.AQUA);

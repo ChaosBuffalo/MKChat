@@ -7,6 +7,8 @@ import net.minecraft.util.text.StringTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DialogueNode {
     private final String nodeId;
@@ -21,7 +23,7 @@ public class DialogueNode {
 
     public void sendMessage(ServerPlayerEntity player, LivingEntity source){
         if (player.getServer() != null){
-            DialogueUtils.sendMessageToAllAround(player.getServer(), source, getMessage(source));
+            DialogueUtils.sendMessageToAllAround(player.getServer(), source, getMessage(source, player));
             if (getCallback() != null){
                 callback.accept(player);
             }
@@ -41,9 +43,21 @@ public class DialogueNode {
         return nodeId;
     }
 
-    public ITextComponent getMessage(LivingEntity source) {
-        ITextComponent name = new StringTextComponent(String.format("<%s> ", source.getDisplayName().getFormattedText()));
-        name.appendSibling(message);
+
+    public ITextComponent getMessage(LivingEntity source, ServerPlayerEntity target) {
+        ITextComponent name = new StringTextComponent(String.format("<%s> ",
+                source.getDisplayName().getFormattedText()));
+        DialogueContext context = new DialogueContext(source, target, this);
+        Stream<ITextComponent> finalMsg = message.stream().map((comp -> {
+            if (comp instanceof ContextStringTextComponent){
+                return ((ContextStringTextComponent) comp).getContextFormattedTextComponent(context);
+            } else {
+               return comp;
+            }
+        }));
+        for (ITextComponent comp : finalMsg.collect(Collectors.toList())){
+            name.appendSibling(comp);
+        }
         return name;
     }
 }

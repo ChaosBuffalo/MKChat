@@ -3,12 +3,10 @@ package com.chaosbuffalo.mkchat.dialogue;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class DialogueTree {
     private final ResourceLocation dialogueName;
@@ -28,6 +26,10 @@ public class DialogueTree {
 
     public void setStartNode(DialogueNode startNode) {
         this.startNode = startNode;
+    }
+
+    public ResourceLocation getDialogueName() {
+        return dialogueName;
     }
 
     @Nullable
