@@ -1,0 +1,27 @@
+{
+  "nodes": {
+    "root": {
+      "name": "root",
+      "text": "Hello {context:player_name}, I am {context:entity_name}. Do you {prompt:need_xp}?"
+    },
+    "grant_level": {
+      "name": "grant_level",
+      "text": "Here is 1 level.",
+      "effects": [
+        {
+          "type": "add_level",
+          "quantity": 1
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "need_xp": {
+      "phrase": "need xp",
+      "defaultPhrase": "I need xp.",
+      "text": "need some xp",
+      "response": "grant_level"
+    }
+  },
+  "entryPoint": "root"
+}
