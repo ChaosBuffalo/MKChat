@@ -7,10 +7,10 @@ import net.minecraft.util.text.StringTextComponent;
 import java.util.List;
 import java.util.function.Function;
 
-public class ContextStringTextComponent extends StringTextComponent {
+public class ContextAwareTextComponent extends StringTextComponent {
     private final Function<DialogueContext, List<Object>> argsSupplier;
 
-    public ContextStringTextComponent(String msg, Function<DialogueContext, List<Object>> argsSupplier) {
+    public ContextAwareTextComponent(String msg, Function<DialogueContext, List<Object>> argsSupplier) {
         super(msg);
         this.argsSupplier = argsSupplier;
     }

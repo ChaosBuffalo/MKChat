@@ -1,7 +1,7 @@
 package com.chaosbuffalo.mkchat.entity;
 
 import com.chaosbuffalo.mkchat.MKChat;
-import com.chaosbuffalo.mkchat.dialogue.ContextStringTextComponent;
+import com.chaosbuffalo.mkchat.dialogue.ContextAwareTextComponent;
 import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
@@ -31,7 +31,7 @@ public class TestChatReceiverEntity extends PigEntity implements IPlayerChatRece
 
     protected DialogueComponent createDialogueComponent(){
         DialogueTree dialogueTree = new DialogueTree(new ResourceLocation("mkchat", "test_receiver"));
-        ITextComponent msg = new ContextStringTextComponent("Hello %s, I am %s. Do you ", (context ->
+        ITextComponent msg = new ContextAwareTextComponent("Hello %s, I am %s. Do you ", (context ->
                 Lists.newArrayList(context.getPlayer().getName().getFormattedText(),
                         context.getSpeaker().getName().getFormattedText())));
         DialoguePrompt testPrompt = new DialoguePrompt("need_xp", "need xp",

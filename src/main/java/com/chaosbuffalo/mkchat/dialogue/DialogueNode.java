@@ -49,8 +49,8 @@ public class DialogueNode {
                 source.getDisplayName().getFormattedText()));
         DialogueContext context = new DialogueContext(source, target, this);
         Stream<ITextComponent> finalMsg = message.stream().map((comp -> {
-            if (comp instanceof ContextStringTextComponent){
-                return ((ContextStringTextComponent) comp).getContextFormattedTextComponent(context);
+            if (comp instanceof ContextAwareTextComponent){
+                return ((ContextAwareTextComponent) comp).getContextFormattedTextComponent(context);
             } else {
                return comp;
             }
