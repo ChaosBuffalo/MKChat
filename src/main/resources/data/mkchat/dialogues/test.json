@@ -1,18 +1,22 @@
 {
   "nodes": {
     "root": {
-      "name": "root",
       "text": "Hello {context:player_name}, I am {context:entity_name}. Do you {prompt:need_xp}?"
     },
     "grant_level": {
-      "name": "grant_level",
       "text": "Here is 1 level.",
       "effects": [
         {
           "type": "add_level",
           "quantity": 1
+        },
+        {
+          "type": "flag_visited"
         }
       ]
+    },
+    "already_granted": {
+      "text": "You already got a level, don't be greedy."
     }
   },
   "prompts": {
@@ -20,7 +24,26 @@
       "phrase": "need xp",
       "defaultPhrase": "I need xp.",
       "text": "need some xp",
-      "response": "grant_level"
+      "responses": [
+        {
+          "node": "grant_level",
+          "conditions": [
+            {
+              "type": "dialogue_not_visited",
+              "node_id": "grant_level"
+            }
+          ]
+        },
+        {
+          "node": "already_granted",
+          "conditions": [
+            {
+              "type": "dialogue_visited",
+              "node_id": "grant_level"
+            }
+          ]
+        }
+      ]
     }
   },
   "entryPoint": "root"
