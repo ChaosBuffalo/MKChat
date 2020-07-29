@@ -21,7 +21,22 @@ public class DialogueTree {
     }
 
     public void addNode(DialogueNode node){
-        nodes.put(node.getNodeId(), node);
+        nodes.put(node.getId(), node);
+        node.setDialogueTree(this);
+    }
+
+    public void bake(){
+        for (DialoguePrompt prompt : prompts.values()){
+            prompt.compileMessage();
+        }
+        for (DialogueNode node : nodes.values()){
+            node.compileMessage();
+        }
+    }
+
+    @Nullable
+    public DialogueNode getNode(String nodeId){
+        return nodes.get(nodeId);
     }
 
     public void setStartNode(DialogueNode startNode) {
@@ -33,19 +48,25 @@ public class DialogueTree {
     }
 
     @Nullable
+    public DialoguePrompt getPrompt(String name){
+        return prompts.get(name);
+    }
+
+    @Nullable
     public DialogueNode getStartNode() {
         return startNode;
     }
 
     public void addPrompt(DialoguePrompt prompt){
-        prompts.put(prompt.getPromptId(), prompt);
+        prompts.put(prompt.getId(), prompt);
+        prompt.setDialogueTree(this);
     }
 
 
     public void handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker){
         for (DialoguePrompt prompt : prompts.values()){
             if (prompt.doesMatchInput(message)){
-                prompt.handlePrompt(player, speaker);
+                prompt.handlePrompt(player, speaker, this);
             }
         }
     }

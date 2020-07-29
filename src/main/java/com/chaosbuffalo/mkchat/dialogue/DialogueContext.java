@@ -6,16 +6,16 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 public class DialogueContext {
     private final LivingEntity speaker;
     private final ServerPlayerEntity player;
-    private final DialogueNode node;
+    private final DialogueObject dialogueObject;
 
-    public DialogueContext(LivingEntity speaker, ServerPlayerEntity player, DialogueNode node){
+    public DialogueContext(LivingEntity speaker, ServerPlayerEntity player, DialogueObject dialogueObject){
         this.speaker = speaker;
         this.player = player;
-        this.node = node;
+        this.dialogueObject = dialogueObject;
     }
 
-    public DialogueNode getNode() {
-        return node;
+    public DialogueObject getDialogueObject() {
+        return dialogueObject;
     }
 
     public LivingEntity getSpeaker() {

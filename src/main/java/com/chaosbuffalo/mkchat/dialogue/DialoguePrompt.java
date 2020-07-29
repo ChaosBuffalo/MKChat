@@ -7,33 +7,27 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
-public class DialoguePrompt {
-    private final String promptId;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DialoguePrompt extends DialogueObject {
     private final String promptPhrase;
     private final String defaultPromptText;
-    private DialogueNode resultNode;
+    private final List<DialogueResponse> responses;
 
-    public DialoguePrompt(String promptId, String promptPhrase, String defaultPromptText){
-        this.promptId = promptId;
+    public DialoguePrompt(String promptId, String promptPhrase, String defaultPromptText, String text){
+        super(promptId, text);
         this.promptPhrase = promptPhrase;
         this.defaultPromptText = defaultPromptText;
-        resultNode = null;
+        this.responses = new ArrayList<>();
     }
 
-    public void setResultNode(DialogueNode resultNode) {
-        this.resultNode = resultNode;
-    }
-
-    public DialogueNode getResultNode() {
-        return resultNode;
+    public void addResponse(DialogueResponse response){
+        responses.add(response);
     }
 
     public String getPromptPhrase() {
         return promptPhrase;
-    }
-
-    public String getPromptId() {
-        return promptId;
     }
 
     public String getDefaultPromptText() {
@@ -44,15 +38,21 @@ public class DialoguePrompt {
         return input.contains(promptPhrase);
     }
 
-    public void handlePrompt(ServerPlayerEntity player, LivingEntity source){
-        if (getResultNode() != null){
-            getResultNode().sendMessage(player, source);
+    public void handlePrompt(ServerPlayerEntity player, LivingEntity source, DialogueTree tree){
+        for (DialogueResponse response : responses){
+            if (response.doesMatchConditions(player, source)){
+                DialogueNode responseNode = tree.getNode(response.getResponseNodeId());
+                if (responseNode != null){
+                    responseNode.sendMessage(player, source);
+                    return;
+                }
+            }
         }
-
     }
 
-    public ITextComponent getPromptLink(String text) {
-        ITextComponent textComponent = new StringTextComponent(String.format("[%s]", text));
+    public ITextComponent getPromptLink() {
+        ITextComponent textComponent = new StringTextComponent(String.format("[%s]",
+                getMessage().getFormattedText()));
         textComponent.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                 getDefaultPromptText()));
         textComponent.getStyle().setColor(TextFormatting.AQUA);

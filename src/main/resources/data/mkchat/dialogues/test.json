@@ -11,7 +11,8 @@
           "quantity": 1
         },
         {
-          "type": "flag_visited"
+          "type": "add_flag",
+          "flagName": "grant_level"
         }
       ]
     },
@@ -29,8 +30,9 @@
           "node": "grant_level",
           "conditions": [
             {
-              "type": "dialogue_not_visited",
-              "node_id": "grant_level"
+              "type": "has_bool_flag",
+              "invert": true,
+              "flagName": "grant_level"
             }
           ]
         },
@@ -38,8 +40,8 @@
           "node": "already_granted",
           "conditions": [
             {
-              "type": "dialogue_visited",
-              "node_id": "grant_level"
+              "type": "has_bool_flag",
+              "flagName": "grant_level"
             }
           ]
         }

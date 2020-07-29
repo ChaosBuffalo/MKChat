@@ -1,16 +1,19 @@
 package com.chaosbuffalo.mkchat.entity;
 
+import com.chaosbuffalo.mkchat.MKChat;
+import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.ResourceLocation;
 
 public class DialogueComponent {
     private final LivingEntity entity;
-    private final DialogueTree dialogueTree;
+    private final ResourceLocation treeName;
 
-    public DialogueComponent(LivingEntity entity, DialogueTree tree){
+    public DialogueComponent(LivingEntity entity, ResourceLocation treeName){
         this.entity = entity;
-        this.dialogueTree = tree;
+        this.treeName = treeName;
     }
 
     public LivingEntity getEntity() {
@@ -18,12 +21,18 @@ public class DialogueComponent {
     }
 
     public void startDialogue(ServerPlayerEntity player){
-        if (dialogueTree.getStartNode() != null) {
-            dialogueTree.getStartNode().sendMessage(player, entity);
+        DialogueTree tree = DialogueManager.getDialogueTree(treeName);
+        if (tree != null && tree.getStartNode() != null) {
+            tree.getStartNode().sendMessage(player, entity);
+        } else {
+            MKChat.LOGGER.info("Failed to find dialogue {}", treeName);
         }
     }
 
     public void receiveMessageFromPlayer(ServerPlayerEntity playerEntity, String msg){
-        dialogueTree.handlePlayerMessage(playerEntity, msg, entity);
+        DialogueTree tree = DialogueManager.getDialogueTree(treeName);
+        if (tree != null){
+            tree.handlePlayerMessage(playerEntity, msg, entity);
+        }
     }
 }
