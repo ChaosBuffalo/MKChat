@@ -9,5 +9,6 @@ public class ChatCommand {
         dispatcher.register(OOCCommand.register());
         dispatcher.register(DimCommand.register());
         dispatcher.register(PartyCommand.register());
+        dispatcher.register(CleanHistoryCommand.register());
     }
 }

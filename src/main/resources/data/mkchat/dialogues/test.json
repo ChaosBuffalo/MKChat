@@ -1,0 +1,81 @@
+{
+  "nodes": {
+    "root": {
+      "text": "Hello {context:player_name}, I am {context:entity_name}. Do you {prompt:need_xp}?"
+    },
+    "grant_level": {
+      "text": "Here is 1 level.",
+      "effects": [
+        {
+          "type": "add_level",
+          "quantity": 1
+        },
+        {
+          "type": "add_flag",
+          "flagName": "grant_level"
+        }
+      ]
+    },
+    "already_granted": {
+      "text": "You already got a level, don't be greedy."
+    },
+    "cant_help": {
+      "text": "I have already helped you as much as I can."
+    }
+  },
+  "prompts": {
+    "need_xp": {
+      "phrase": "need xp",
+      "defaultPhrase": "I need xp.",
+      "text": "need some xp",
+      "responses": [
+        {
+          "node": "grant_level",
+          "conditions": [
+            {
+              "type": "has_bool_flag",
+              "invert": true,
+              "flagName": "grant_level"
+            }
+          ]
+        },
+        {
+          "node": "already_granted",
+          "conditions": [
+            {
+              "type": "has_bool_flag",
+              "flagName": "grant_level"
+            }
+          ]
+        }
+      ]
+    },
+    "hail": {
+      "phrase": "",
+      "defaultPhrase": "",
+      "text": "",
+      "responses": [
+        {
+          "node": "root",
+          "conditions": [
+            {
+              "type": "has_bool_flag",
+              "flagName": "grant_level",
+              "invert": true
+            }
+          ]
+        },
+        {
+          "node": "cant_help",
+          "conditions": [
+            {
+              "type": "has_bool_flag",
+              "flagName": "grant_level"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "hailPrompt": "hail"
+}
