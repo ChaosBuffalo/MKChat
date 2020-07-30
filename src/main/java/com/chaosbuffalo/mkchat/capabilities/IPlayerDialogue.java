@@ -13,4 +13,6 @@ public interface IPlayerDialogue extends INBTSerializable<CompoundNBT> {
     PlayerEntity getPlayer();
 
     PlayerNPCDialogueEntry getNPCEntry(UUID uuid);
+
+    void cleanHistory();
 }

@@ -24,6 +24,11 @@ public class PlayerDialogueHandler implements IPlayerDialogue {
     }
 
     @Override
+    public void cleanHistory() {
+        npcEntries.clear();
+    }
+
+    @Override
     public void attach(PlayerEntity player) {
         this.player = player;
     }
