@@ -12,7 +12,7 @@ public class DialogueTree {
     private final ResourceLocation dialogueName;
     private final Map<String, DialogueNode> nodes;
     private final Map<String, DialoguePrompt> prompts;
-    private DialogueNode startNode;
+    private DialoguePrompt hailPrompt;
 
     public DialogueTree(ResourceLocation dialogueName){
         this.dialogueName = dialogueName;
@@ -34,13 +34,13 @@ public class DialogueTree {
         }
     }
 
+    public void setHailPrompt(DialoguePrompt hailPrompt) {
+        this.hailPrompt = hailPrompt;
+    }
+
     @Nullable
     public DialogueNode getNode(String nodeId){
         return nodes.get(nodeId);
-    }
-
-    public void setStartNode(DialogueNode startNode) {
-        this.startNode = startNode;
     }
 
     public ResourceLocation getDialogueName() {
@@ -53,8 +53,8 @@ public class DialogueTree {
     }
 
     @Nullable
-    public DialogueNode getStartNode() {
-        return startNode;
+    public DialoguePrompt getHailPrompt() {
+        return hailPrompt;
     }
 
     public void addPrompt(DialoguePrompt prompt){

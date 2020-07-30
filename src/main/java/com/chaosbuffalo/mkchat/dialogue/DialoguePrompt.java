@@ -35,7 +35,7 @@ public class DialoguePrompt extends DialogueObject {
     }
 
     public boolean doesMatchInput(String input){
-        return input.contains(promptPhrase);
+        return !promptPhrase.equals("") && input.contains(promptPhrase);
     }
 
     public void handlePrompt(ServerPlayerEntity player, LivingEntity source, DialogueTree tree){

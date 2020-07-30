@@ -22,8 +22,8 @@ public class DialogueComponent {
 
     public void startDialogue(ServerPlayerEntity player){
         DialogueTree tree = DialogueManager.getDialogueTree(treeName);
-        if (tree != null && tree.getStartNode() != null) {
-            tree.getStartNode().sendMessage(player, entity);
+        if (tree != null && tree.getHailPrompt() != null) {
+            tree.getHailPrompt().handlePrompt(player, entity, tree);
         } else {
             MKChat.LOGGER.info("Failed to find dialogue {}", treeName);
         }

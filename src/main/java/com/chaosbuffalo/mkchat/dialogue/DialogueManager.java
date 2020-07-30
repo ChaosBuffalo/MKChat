@@ -154,6 +154,7 @@ public class DialogueManager extends JsonReloadListener {
     private DialoguePrompt parsePrompt(String name, JsonObject object){
         DialoguePrompt newPrompt = new DialoguePrompt(name, object.get("phrase").getAsString(),
                 object.get("defaultPhrase").getAsString(), object.get("text").getAsString());
+        MKChat.LOGGER.info("Loading dialogue prompt: {} with text: {}", name, object.get("text").getAsString());
         JsonArray responseArray = object.getAsJsonArray("responses");
         for (JsonElement ele : responseArray){
             JsonObject responseObj = ele.getAsJsonObject();
@@ -230,9 +231,9 @@ public class DialogueManager extends JsonReloadListener {
                 tree.addNode(node);
             }
         }
-        if (json.has("entryPoint")){
-            tree.setStartNode(tree.getNode(json.get("entryPoint").getAsString()));
-            MKChat.LOGGER.info("Set start node for {} as {}", loc, json.get("entryPoint").getAsString());
+        if (json.has("hailPrompt")){
+            tree.setHailPrompt(tree.getPrompt(json.get("hailPrompt").getAsString()));
+            MKChat.LOGGER.info("Set start node for {} as {}", loc, json.get("hailPrompt").getAsString());
         }
         tree.bake();
         return tree;

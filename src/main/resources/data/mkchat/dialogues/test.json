@@ -18,6 +18,9 @@
     },
     "already_granted": {
       "text": "You already got a level, don't be greedy."
+    },
+    "cant_help": {
+      "text": "I have already helped you as much as I can."
     }
   },
   "prompts": {
@@ -46,7 +49,33 @@
           ]
         }
       ]
+    },
+    "hail": {
+      "phrase": "",
+      "defaultPhrase": "",
+      "text": "",
+      "responses": [
+        {
+          "node": "root",
+          "conditions": [
+            {
+              "type": "has_bool_flag",
+              "flagName": "grant_level",
+              "invert": true
+            }
+          ]
+        },
+        {
+          "node": "cant_help",
+          "conditions": [
+            {
+              "type": "has_bool_flag",
+              "flagName": "grant_level"
+            }
+          ]
+        }
+      ]
     }
   },
-  "entryPoint": "root"
+  "hailPrompt": "hail"
 }
