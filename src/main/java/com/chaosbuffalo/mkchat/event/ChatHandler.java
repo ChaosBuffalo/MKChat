@@ -1,5 +1,6 @@
 package com.chaosbuffalo.mkchat.event;
 
+import com.chaosbuffalo.mkchat.ChatConstants;
 import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.entity.IPlayerChatReceiver;
 import net.minecraft.entity.LivingEntity;
@@ -16,10 +17,10 @@ import java.util.List;
 
 @Mod.EventBusSubscriber(modid = MKChat.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ChatHandler {
-    private static final double CHAT_RADIUS = 5.0;
+
 
     private static AxisAlignedBB getChatBoundingBox(ServerPlayerEntity entity){
-        return new AxisAlignedBB(new BlockPos(entity)).grow(CHAT_RADIUS, entity.getHeight(), CHAT_RADIUS);
+        return new AxisAlignedBB(new BlockPos(entity)).grow(ChatConstants.CHAT_RADIUS, entity.getHeight(), ChatConstants.CHAT_RADIUS);
     }
 
     @SubscribeEvent
@@ -27,7 +28,7 @@ public class ChatHandler {
         ServerPlayerEntity player = event.getPlayer();
         if (player.getServer() != null){
             player.getServer().getPlayerList().sendToAllNearExcept(null,
-                    player.getPosX(), player.getPosY(), player.getPosZ(), CHAT_RADIUS,
+                    player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
                     player.dimension,
                     new SChatPacket(event.getComponent(), ChatType.CHAT));
             List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class, getChatBoundingBox(player),
