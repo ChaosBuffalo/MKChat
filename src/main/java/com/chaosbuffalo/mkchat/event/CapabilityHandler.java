@@ -1,7 +1,7 @@
 package com.chaosbuffalo.mkchat.event;
 
 import com.chaosbuffalo.mkchat.MKChat;
-import com.chaosbuffalo.mkchat.capabilities.Capabilities;
+import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
 import com.chaosbuffalo.mkchat.capabilities.PlayerDialogueProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,7 +17,7 @@ public class CapabilityHandler {
     @SubscribeEvent
     public static void attachEntityCapability(AttachCapabilitiesEvent<Entity> e) {
         if (e.getObject() instanceof PlayerEntity) {
-            e.addCapability(Capabilities.PLAYER_DIALOGUE_CAP_ID,
+            e.addCapability(ChatCapabilities.PLAYER_DIALOGUE_CAP_ID,
                     new PlayerDialogueProvider((PlayerEntity) e.getObject()));
         }
     }

@@ -6,6 +6,7 @@ import com.chaosbuffalo.mkchat.dialogue.conditions.HasBoolFlagCondition;
 import com.chaosbuffalo.mkchat.dialogue.effects.AddLevelEffect;
 import com.chaosbuffalo.mkchat.dialogue.effects.DialogueEffect;
 import com.chaosbuffalo.mkchat.dialogue.effects.AddFlag;
+import com.chaosbuffalo.mkchat.event.DialogueManagerSetupEvent;
 import com.chaosbuffalo.mkchat.json.SerializationUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
@@ -16,6 +17,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -23,6 +26,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+@Mod.EventBusSubscriber(modid=MKChat.MODID, bus= Mod.EventBusSubscriber.Bus.MOD)
 public class DialogueManager extends JsonReloadListener {
 
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -58,8 +62,8 @@ public class DialogueManager extends JsonReloadListener {
                 }
             };
 
-
-    static {
+    @SubscribeEvent
+    public static void dialogueSetupEvent(DialogueManagerSetupEvent event){
         putEffectDeserializer(AddLevelEffect.effectTypeName,
                 SerializationUtils.deserialize(AddLevelEffect.class));
         putEffectDeserializer(AddFlag.effectTypeName,

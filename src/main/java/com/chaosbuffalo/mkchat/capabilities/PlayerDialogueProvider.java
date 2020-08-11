@@ -22,19 +22,19 @@ public class PlayerDialogueProvider implements ICapabilitySerializable<CompoundN
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        return Capabilities.PLAYER_DIALOGUE_CAPABILITY.orEmpty(cap, LazyOptional.of(() -> data));
+        return ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY.orEmpty(cap, LazyOptional.of(() -> data));
     }
 
     @Override
     public CompoundNBT serializeNBT() {
-        return (CompoundNBT) Capabilities.PLAYER_DIALOGUE_CAPABILITY.getStorage().writeNBT(
-                Capabilities.PLAYER_DIALOGUE_CAPABILITY, data, null);
+        return (CompoundNBT) ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY.getStorage().writeNBT(
+                ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY, data, null);
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        Capabilities.PLAYER_DIALOGUE_CAPABILITY.getStorage().readNBT(
-                Capabilities.PLAYER_DIALOGUE_CAPABILITY, data, null, nbt);
+        ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY.getStorage().readNBT(
+                ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY, data, null, nbt);
     }
 
 

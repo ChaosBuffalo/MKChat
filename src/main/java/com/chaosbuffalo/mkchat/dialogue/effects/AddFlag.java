@@ -1,6 +1,6 @@
 package com.chaosbuffalo.mkchat.dialogue.effects;
 
-import com.chaosbuffalo.mkchat.capabilities.Capabilities;
+import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
 import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -20,7 +20,7 @@ public class AddFlag extends DialogueEffect{
 
     @Override
     public void applyEffect(ServerPlayerEntity player, LivingEntity source, DialogueNode node) {
-        player.getCapability(Capabilities.PLAYER_DIALOGUE_CAPABILITY).ifPresent(cap ->
+        player.getCapability(ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY).ifPresent(cap ->
                 cap.getNPCEntry(source.getUniqueID()).putBoolFlag(flagName, true));
     }
 }
