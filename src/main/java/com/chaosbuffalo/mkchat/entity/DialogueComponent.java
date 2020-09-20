@@ -11,13 +11,28 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
 
+import javax.annotation.Nullable;
+
 public class DialogueComponent {
     private final LivingEntity entity;
-    private final ResourceLocation treeName;
+    private ResourceLocation treeName;
 
     public DialogueComponent(LivingEntity entity, ResourceLocation treeName){
         this.entity = entity;
         this.treeName = treeName;
+    }
+
+    public DialogueComponent(LivingEntity entity){
+        this(entity, null);
+    }
+
+    public void setTreeName(ResourceLocation treeName) {
+        this.treeName = treeName;
+    }
+
+    @Nullable
+    public ResourceLocation getTreeName() {
+        return treeName;
     }
 
     public LivingEntity getEntity() {
@@ -25,7 +40,7 @@ public class DialogueComponent {
     }
 
     public void startDialogue(ServerPlayerEntity player){
-        DialogueTree tree = DialogueManager.getDialogueTree(treeName);
+        DialogueTree tree = DialogueManager.getDialogueTree(getTreeName());
         if (tree != null && tree.getHailPrompt() != null) {
             if (player.getServer() != null){
                 player.getServer().getPlayerList().sendToAllNearExcept(null,
@@ -37,14 +52,17 @@ public class DialogueComponent {
             }
             tree.getHailPrompt().handlePrompt(player, entity, tree);
         } else {
-            MKChat.LOGGER.info("Failed to find dialogue {}", treeName);
+            MKChat.LOGGER.info("Failed to find dialogue {}", getTreeName());
         }
     }
 
     public void receiveMessageFromPlayer(ServerPlayerEntity playerEntity, String msg){
-        DialogueTree tree = DialogueManager.getDialogueTree(treeName);
-        if (tree != null){
-            tree.handlePlayerMessage(playerEntity, msg, entity);
+        if (getTreeName() != null){
+            DialogueTree tree = DialogueManager.getDialogueTree(getTreeName());
+            if (tree != null){
+                tree.handlePlayerMessage(playerEntity, msg, entity);
+            }
         }
+
     }
 }

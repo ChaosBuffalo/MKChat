@@ -1,6 +1,6 @@
 package com.chaosbuffalo.mkchat.command;
 
-import com.chaosbuffalo.mkchat.capabilities.Capabilities;
+import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
 import com.chaosbuffalo.mkchat.capabilities.IPlayerDialogue;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -16,7 +16,7 @@ public class CleanHistoryCommand {
     }
 
     static int handleMessage(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        ctx.getSource().asPlayer().getCapability(Capabilities.PLAYER_DIALOGUE_CAPABILITY)
+        ctx.getSource().asPlayer().getCapability(ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY)
                 .ifPresent(IPlayerDialogue::cleanHistory);
         return Command.SINGLE_SUCCESS;
     }

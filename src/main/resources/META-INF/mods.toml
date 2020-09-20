@@ -23,7 +23,7 @@ credits="Developed by the MK Ultra Team" #optional
 description='''
 MKChat extends the chat functionality of Minecraft to be a little more mmo-like
 '''
-[[dependencies.mkfaction]] #optional
+[[dependencies.mkchat]] #optional
     # the modid of the dependency
     modId="forge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified

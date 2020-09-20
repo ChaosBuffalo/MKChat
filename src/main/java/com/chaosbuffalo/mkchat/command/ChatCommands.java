@@ -3,7 +3,7 @@ package com.chaosbuffalo.mkchat.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandSource;
 
-public class ChatCommand {
+public class ChatCommands {
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(OOCCommand.register());
