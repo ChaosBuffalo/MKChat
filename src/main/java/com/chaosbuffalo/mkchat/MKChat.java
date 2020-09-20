@@ -53,7 +53,7 @@ public class MKChat
 
     private void setup(final FMLCommonSetupEvent event){
         ChatCapabilities.registerCapabilities();
-        FMLJavaModLoadingContext.get().getModEventBus().post(new DialogueManagerSetupEvent());
+        DialogueManager.dialogueSetup();
     }
 
 

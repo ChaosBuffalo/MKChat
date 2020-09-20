@@ -62,8 +62,7 @@ public class DialogueManager extends JsonReloadListener {
                 }
             };
 
-    @SubscribeEvent
-    public static void dialogueSetupEvent(DialogueManagerSetupEvent event){
+    public static void dialogueSetup(){
         putEffectDeserializer(AddLevelEffect.effectTypeName,
                 SerializationUtils.deserialize(AddLevelEffect.class));
         putEffectDeserializer(AddFlag.effectTypeName,
