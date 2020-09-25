@@ -2,7 +2,8 @@ package com.chaosbuffalo.mkchat.event;
 
 import com.chaosbuffalo.mkchat.ChatConstants;
 import com.chaosbuffalo.mkchat.MKChat;
-import com.chaosbuffalo.mkchat.entity.IPlayerChatReceiver;
+import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
+import com.chaosbuffalo.mkchat.capabilities.INpcDialogue;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SChatPacket;
@@ -32,9 +33,12 @@ public class ChatHandler {
                     player.dimension,
                     new SChatPacket(event.getComponent(), ChatType.CHAT));
             List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class, getChatBoundingBox(player),
-                    (x) -> x instanceof IPlayerChatReceiver && x.canEntityBeSeen(player));
+                    (x) -> x.canEntityBeSeen(player) && x.getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY)
+                            .map(INpcDialogue::hasDialogue).orElse(false));
             for (LivingEntity entity : entities){
-                ((IPlayerChatReceiver) entity).receiveMessage(player, event.getMessage());
+                entity.getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY).ifPresent(cap -> {
+                    cap.receiveMessage(player, event.getMessage());
+                });
             }
         }
         event.setCanceled(true);
