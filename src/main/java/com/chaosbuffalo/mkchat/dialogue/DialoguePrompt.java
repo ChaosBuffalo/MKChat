@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
@@ -51,11 +52,11 @@ public class DialoguePrompt extends DialogueObject {
     }
 
     public ITextComponent getPromptLink() {
-        ITextComponent textComponent = new StringTextComponent(String.format("[%s]",
-                getMessage().getFormattedText()));
-        textComponent.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                getDefaultPromptText()));
-        textComponent.getStyle().setColor(TextFormatting.AQUA);
+        StringTextComponent textComponent = new StringTextComponent(String.format("[%s]",
+                getMessage().getString()));
+        textComponent.mergeStyle(TextFormatting.AQUA);
+        textComponent.setStyle(textComponent.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                getDefaultPromptText())));
         return textComponent;
     }
 }

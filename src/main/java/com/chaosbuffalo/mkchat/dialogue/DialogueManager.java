@@ -6,7 +6,6 @@ import com.chaosbuffalo.mkchat.dialogue.conditions.HasBoolFlagCondition;
 import com.chaosbuffalo.mkchat.dialogue.effects.AddLevelEffect;
 import com.chaosbuffalo.mkchat.dialogue.effects.DialogueEffect;
 import com.chaosbuffalo.mkchat.dialogue.effects.AddFlag;
-import com.chaosbuffalo.mkchat.event.DialogueManagerSetupEvent;
 import com.chaosbuffalo.mkchat.json.SerializationUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
@@ -17,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-@Mod.EventBusSubscriber(modid=MKChat.MODID, bus= Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid=MKChat.MODID, bus=Mod.EventBusSubscriber.Bus.MOD)
 public class DialogueManager extends JsonReloadListener {
 
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -37,10 +37,10 @@ public class DialogueManager extends JsonReloadListener {
     private static final Map<String,Function<DialogueContext, String>> contextProviders = new HashMap<>();
 
     private static final Function<DialogueContext, String> playerNameProvider =
-            (context) -> context.getPlayer().getName().getFormattedText();
+            (context) -> context.getPlayer().getName().getString();
 
     private static final Function<DialogueContext, String> entityNameProvider =
-            (context) -> context.getSpeaker().getName().getFormattedText();
+            (context) -> context.getSpeaker().getName().getString();
 
     private static final BiFunction<String, DialogueTree, ITextComponent> contextProvider =
             (name, tree) -> {
@@ -100,19 +100,25 @@ public class DialogueManager extends JsonReloadListener {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+
     @Override
-    protected void apply(Map<ResourceLocation, JsonObject> objectIn,
+    protected void apply(Map<ResourceLocation, JsonElement> objectIn,
                          IResourceManager resourceManagerIn,
                          IProfiler profilerIn) { ;
         trees.clear();
-        for(Map.Entry<ResourceLocation, JsonObject> entry : objectIn.entrySet()) {
+        for(Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
             MKChat.LOGGER.info("Found dialogue tree file: {}", resourcelocation);
             if (resourcelocation.getPath().startsWith("_")) continue; //Forge: filter anything beginning with "_" as it's used for metadata.
-            DialogueTree tree = parseDialogueTree(entry.getKey(), entry.getValue());
+            DialogueTree tree = parseDialogueTree(entry.getKey(), entry.getValue().getAsJsonObject());
             trees.put(tree.getDialogueName(), tree);
 
         }
+    }
+
+    @SubscribeEvent
+    public void subscribeEvent(AddReloadListenerEvent event){
+        event.addListener(this);
     }
 
     private static ITextComponent handleTextProviderRequest(String request, DialogueTree tree){
@@ -135,14 +141,14 @@ public class DialogueManager extends JsonReloadListener {
             if (parsing.contains("{") && parsing.contains("}")){
                 int index = parsing.indexOf("{");
                 int endIndex = parsing.indexOf("}");
-                component.appendText(parsing.substring(0, index));
+                component.getSiblings().add(new StringTextComponent(parsing.substring(0, index)));
                 String textProviderRequest = parsing.substring(index, endIndex + 1)
                         .replace("{", "").replace("}", "");
                 //handle request
-                component.appendSibling(handleTextProviderRequest(textProviderRequest, tree));
+                component.getSiblings().add(handleTextProviderRequest(textProviderRequest, tree));
                 parsing = parsing.substring(endIndex + 1);
             } else {
-                component.appendText(parsing);
+                component.getSiblings().add(new StringTextComponent(parsing));
                 parsing = "";
             }
         }

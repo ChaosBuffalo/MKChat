@@ -11,6 +11,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
@@ -53,10 +54,10 @@ public class NpcDialogueHandler implements INpcDialogue{
             if (player.getServer() != null){
                 player.getServer().getPlayerList().sendToAllNearExcept(null,
                         player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
-                        player.dimension,
+                        player.getServerWorld().getDimensionKey(),
                         new SChatPacket(new StringTextComponent(String.format("<%s> Hail, %s",
-                                player.getName().getFormattedText(), this.getEntity().getName().getFormattedText())),
-                                ChatType.CHAT));
+                                player.getName().getString(), this.getEntity().getName().getString())),
+                                ChatType.CHAT, Util.DUMMY_UUID));
             }
             tree.getHailPrompt().handlePrompt(player, entity, tree);
         } else {

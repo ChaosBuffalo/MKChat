@@ -42,7 +42,7 @@ public class DialogueObject {
 
     public ITextComponent getMessage(LivingEntity source, ServerPlayerEntity target) {
         ITextComponent name = new StringTextComponent(String.format("<%s> ",
-                source.getDisplayName().getFormattedText()));
+                source.getDisplayName().getString()));
         DialogueContext context = new DialogueContext(source, target, this);
         Stream<ITextComponent> finalMsg = message.getSiblings().stream().map((comp -> {
             if (comp instanceof ContextAwareTextComponent){
@@ -53,7 +53,7 @@ public class DialogueObject {
         }));
         for (ITextComponent comp : finalMsg.collect(Collectors.toList())){
             MKChat.LOGGER.info("Comp: {}", comp);
-            name.appendSibling(comp);
+            name.getSiblings().add(comp);
         }
         return name;
     }
