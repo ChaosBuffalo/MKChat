@@ -1,76 +1,78 @@
 {
   "nodes": {
     "root": {
-      "text": "Hello {context:player_name}, I am {context:entity_name}. Do you {prompt:need_xp}?"
+      "message": "Hello {context:player_name}, I am {context:entity_name}. Do you {prompt:need_xp}"
+    },
+    "cant_help": {
+      "message": "I have already helped you as much as I can."
     },
     "grant_level": {
-      "text": "Here is 1 level.",
+      "message": "Here is 1 level.",
       "effects": [
         {
-          "type": "add_level",
-          "quantity": 1
+          "dialogueEffectType": "mkchat:dialogue_effect.add_level",
+          "amount": 1
         },
         {
-          "type": "add_flag",
-          "flagName": "grant_level"
+          "dialogueEffectType": "mkchat:dialogue_effect.add_flag",
+          "flagName": "mkchat:grant_level"
         }
       ]
     },
     "already_granted": {
-      "text": "You already got a level, don't be greedy."
-    },
-    "cant_help": {
-      "text": "I have already helped you as much as I can."
+      "message": "You already got a level, don't be greedy."
     }
   },
   "prompts": {
     "need_xp": {
-      "phrase": "need xp",
-      "defaultPhrase": "I need xp.",
-      "text": "need some xp",
+      "message": "need some xp",
+      "promptPhrase": "need xp",
+      "promptText": "I need xp.",
       "responses": [
         {
-          "node": "grant_level",
+          "responseNodeId": "grant_level",
           "conditions": [
             {
-              "type": "has_bool_flag",
+              "dialogueConditionType": "mkchat:dialogue_condition.has_bool_flag",
               "invert": true,
-              "flagName": "grant_level"
+              "flagName": "mkchat:grant_level"
             }
           ]
         },
         {
-          "node": "already_granted",
+          "responseNodeId": "already_granted",
           "conditions": [
             {
-              "type": "has_bool_flag",
-              "flagName": "grant_level"
+              "dialogueConditionType": "mkchat:dialogue_condition.has_bool_flag",
+              "invert": false,
+              "flagName": "mkchat:grant_level"
             }
           ]
         }
       ]
     },
     "hail": {
-      "phrase": "",
-      "defaultPhrase": "",
-      "text": "",
+      "message": "",
+      "promptPhrase": "",
+      "promptText": "",
       "responses": [
         {
-          "node": "root",
+          "responseNodeId": "root",
           "conditions": [
             {
-              "type": "has_bool_flag",
-              "flagName": "grant_level",
-              "invert": true
+              "dialogueConditionType": "mkchat:dialogue_condition.has_bool_flag",
+              "invert": true,
+              "flagName": "mkchat:grant_level"
             }
           ]
         },
         {
-          "node": "cant_help",
+          "responseNodeId": "cant_help",
           "conditions": [
             {
-              "type": "has_bool_flag",
-              "flagName": "grant_level"
+              "dialogueConditionType": "mkchat:dialogue_condition.has_bool_flag",
+              "invert": false,
+              "flagName": "mkchat:grant_level"
             }
           ]
         }

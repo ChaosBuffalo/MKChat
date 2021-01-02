@@ -16,7 +16,6 @@ public class ContextAwareTextComponent extends StringTextComponent {
     }
 
     public ITextComponent getContextFormattedTextComponent(DialogueContext context){
-        MKChat.LOGGER.info("Applying {}, {}", getText(), argsSupplier.apply(context));
         return new StringTextComponent(String.format(getText(), argsSupplier.apply(context).toArray()));
     }
 }

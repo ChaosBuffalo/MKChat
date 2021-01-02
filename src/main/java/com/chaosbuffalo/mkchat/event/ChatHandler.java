@@ -21,8 +21,8 @@ import java.util.List;
 public class ChatHandler {
 
 
-    private static AxisAlignedBB getChatBoundingBox(ServerPlayerEntity entity){
-        return new AxisAlignedBB(new BlockPos(entity.getPosition())).grow(ChatConstants.CHAT_RADIUS, entity.getHeight(), ChatConstants.CHAT_RADIUS);
+    private static AxisAlignedBB getChatBoundingBox(ServerPlayerEntity entity, double radius){
+        return new AxisAlignedBB(new BlockPos(entity.getPosition())).grow(radius, entity.getHeight(), radius);
     }
 
     @SubscribeEvent
@@ -32,8 +32,9 @@ public class ChatHandler {
             player.getServer().getPlayerList().sendToAllNearExcept(null,
                     player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
                     player.getServerWorld().getDimensionKey(),
-                    new SChatPacket(event.getComponent(), ChatType.CHAT, Util.DUMMY_UUID));
-            List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class, getChatBoundingBox(player),
+                    new SChatPacket(event.getComponent(), ChatType.CHAT, player.getUniqueID()));
+            List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class,
+                    getChatBoundingBox(player, ChatConstants.NPC_CHAT_RADIUS),
                     (x) -> x.canEntityBeSeen(player) && x.getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY)
                             .map(INpcDialogue::hasDialogue).orElse(false));
             for (LivingEntity entity : entities){
