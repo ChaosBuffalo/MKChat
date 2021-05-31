@@ -11,7 +11,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
@@ -37,7 +37,7 @@ public class TestChatReceiverEntity extends PigEntity{
     }
 
     @Override
-    public ActionResultType applyPlayerInteraction(PlayerEntity player, Vec3d vec, Hand hand) {
+    public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
         if (!player.world.isRemote()){
             getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY).ifPresent(cap ->
                     cap.startDialogue((ServerPlayerEntity) player));

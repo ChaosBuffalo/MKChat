@@ -7,6 +7,7 @@ import com.chaosbuffalo.mkchat.capabilities.INpcDialogue;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SChatPacket;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ChatType;
@@ -20,8 +21,8 @@ import java.util.List;
 public class ChatHandler {
 
 
-    private static AxisAlignedBB getChatBoundingBox(ServerPlayerEntity entity){
-        return new AxisAlignedBB(new BlockPos(entity)).grow(ChatConstants.CHAT_RADIUS, entity.getHeight(), ChatConstants.CHAT_RADIUS);
+    private static AxisAlignedBB getChatBoundingBox(ServerPlayerEntity entity, double radius){
+        return new AxisAlignedBB(new BlockPos(entity.getPosition())).grow(radius, entity.getHeight(), radius);
     }
 
     @SubscribeEvent
@@ -30,9 +31,10 @@ public class ChatHandler {
         if (player.getServer() != null){
             player.getServer().getPlayerList().sendToAllNearExcept(null,
                     player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
-                    player.dimension,
-                    new SChatPacket(event.getComponent(), ChatType.CHAT));
-            List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class, getChatBoundingBox(player),
+                    player.getServerWorld().getDimensionKey(),
+                    new SChatPacket(event.getComponent(), ChatType.CHAT, player.getUniqueID()));
+            List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class,
+                    getChatBoundingBox(player, ChatConstants.NPC_CHAT_RADIUS),
                     (x) -> x.canEntityBeSeen(player) && x.getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY)
                             .map(INpcDialogue::hasDialogue).orElse(false));
             for (LivingEntity entity : entities){

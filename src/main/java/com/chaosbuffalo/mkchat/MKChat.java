@@ -8,7 +8,9 @@ import com.chaosbuffalo.mkchat.dialogue.IDialogueExtension;
 import com.chaosbuffalo.mkchat.event.DialogueManagerSetupEvent;
 import com.chaosbuffalo.mkchat.init.ChatEntityTypes;
 import net.minecraft.client.renderer.entity.PigRenderer;
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -36,26 +38,24 @@ public class MKChat
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         ChatEntityTypes.ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
-    }
-
-    @SuppressWarnings("unused")
-    @SubscribeEvent
-    public void aboutToStart(FMLServerAboutToStartEvent event){
         dialogueManager = new DialogueManager();
-        event.getServer().getResourceManager().addReloadListener(dialogueManager);
     }
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         LOGGER.info("In MKChat command registration");
-        ChatCommands.register(event.getCommandDispatcher());
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event){
+        ChatCommands.register(event.getDispatcher());
     }
 
     private void setup(final FMLCommonSetupEvent event){
         ChatCapabilities.registerCapabilities();
         DialogueManager.dialogueSetup();
+        ChatEntityTypes.setupAttributes();
     }
-
 
 
     private void processIMC(final InterModProcessEvent event)

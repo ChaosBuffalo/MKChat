@@ -1,6 +1,9 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
 import com.chaosbuffalo.mkchat.MKChat;
+import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
@@ -10,9 +13,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DialogueObject {
-    private final String rawMessage;
+    public static final String INVALID_OBJECT = "invalid";
+    public static final String EMPTY_MSG = "";
+    private String rawMessage;
     private ITextComponent message;
-    private final String id;
+    private String id;
     private DialogueTree dialogueTree;
 
     public DialogueObject(String id, String rawMessage){
@@ -36,13 +41,17 @@ public class DialogueObject {
         return message;
     }
 
+    public boolean isValid(){
+        return !getId().equals(INVALID_OBJECT);
+    }
+
     public void compileMessage(){
         this.message = DialogueManager.parseDialogueMessage(rawMessage, dialogueTree);
     }
 
     public ITextComponent getMessage(LivingEntity source, ServerPlayerEntity target) {
         ITextComponent name = new StringTextComponent(String.format("<%s> ",
-                source.getDisplayName().getFormattedText()));
+                source.getDisplayName().getString()));
         DialogueContext context = new DialogueContext(source, target, this);
         Stream<ITextComponent> finalMsg = message.getSiblings().stream().map((comp -> {
             if (comp instanceof ContextAwareTextComponent){
@@ -53,8 +62,19 @@ public class DialogueObject {
         }));
         for (ITextComponent comp : finalMsg.collect(Collectors.toList())){
             MKChat.LOGGER.info("Comp: {}", comp);
-            name.appendSibling(comp);
+            name.getSiblings().add(comp);
         }
         return name;
+    }
+
+    public <D> void deserialize(Dynamic<D> dynamic) {
+        this.rawMessage = dynamic.get("message").asString("");
+    }
+
+
+    public <D> D serialize(DynamicOps<D> ops) {
+        return ops.createMap(ImmutableMap.of(
+                ops.createString("message"), ops.createString(rawMessage)
+        ));
     }
 }

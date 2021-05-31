@@ -1,6 +1,7 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 public class PlayerNPCDialogueEntry implements INBTSerializable<CompoundNBT> {
     private UUID uuid;
-    private final Map<String, Boolean> boolFlags;
+    private final Map<ResourceLocation, Boolean> boolFlags;
 
     public PlayerNPCDialogueEntry(UUID uuid){
         this.uuid = uuid;
@@ -20,11 +21,11 @@ public class PlayerNPCDialogueEntry implements INBTSerializable<CompoundNBT> {
         return uuid;
     }
 
-    public void putBoolFlag(String key, boolean value){
+    public void putBoolFlag(ResourceLocation key, boolean value){
         boolFlags.put(key, value);
     }
 
-    public boolean getBoolFlag(String key){
+    public boolean getBoolFlag(ResourceLocation key){
         return boolFlags.getOrDefault(key, false);
     }
 
@@ -33,8 +34,8 @@ public class PlayerNPCDialogueEntry implements INBTSerializable<CompoundNBT> {
         CompoundNBT tag = new CompoundNBT();
         tag.putUniqueId("npcId", uuid);
         CompoundNBT boolFlagsTag = new CompoundNBT();
-        for (Map.Entry<String, Boolean> entry : boolFlags.entrySet()){
-            boolFlagsTag.putBoolean(entry.getKey(), entry.getValue());
+        for (Map.Entry<ResourceLocation, Boolean> entry : boolFlags.entrySet()){
+            boolFlagsTag.putBoolean(entry.getKey().toString(), entry.getValue());
         }
         tag.put("boolFlags", boolFlagsTag);
         return tag;
@@ -47,7 +48,7 @@ public class PlayerNPCDialogueEntry implements INBTSerializable<CompoundNBT> {
         CompoundNBT boolFlagsTag = nbt.getCompound("boolFlags");
         for (String key : boolFlagsTag.keySet()){
             boolean value = boolFlagsTag.getBoolean(key);
-            boolFlags.put(key, value);
+            boolFlags.put(new ResourceLocation(key), value);
         }
     }
 }
