@@ -7,10 +7,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
+@Mod.EventBusSubscriber(modid = MKChat.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChatEntityTypes {
 
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES,
@@ -24,7 +28,9 @@ public class ChatEntityTypes {
                             .build(new ResourceLocation(MKChat.MODID, "test_entity").toString())
     );
 
-    public static void setupAttributes(){
-        GlobalEntityTypeAttributes.put(TEST_CHAT.get(), PigEntity.func_234215_eI_().create());
+
+    @SubscribeEvent
+    public static void registerEntityAttributes(EntityAttributeCreationEvent event){
+        event.put(TEST_CHAT.get(), PigEntity.func_234215_eI_().create());
     }
 }

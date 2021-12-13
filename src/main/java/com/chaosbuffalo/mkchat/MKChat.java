@@ -54,7 +54,6 @@ public class MKChat
     private void setup(final FMLCommonSetupEvent event){
         ChatCapabilities.registerCapabilities();
         DialogueManager.dialogueSetup();
-        ChatEntityTypes.setupAttributes();
     }
 
 
