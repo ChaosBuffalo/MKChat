@@ -5,6 +5,8 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -38,6 +40,17 @@ public class DialoguePrompt extends DialogueObject {
     public DialoguePrompt addResponse(DialogueResponse response){
         responses.add(response);
         return this;
+    }
+
+    public List<DialogueResponse> getResponses() {
+        return responses;
+    }
+
+    public DialoguePrompt copy(){
+        DialoguePrompt newPrompt = new DialoguePrompt();
+        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
+        newPrompt.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        return newPrompt;
     }
 
     public String getPromptPhrase() {

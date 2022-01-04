@@ -7,6 +7,9 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,17 @@ public class DialogueNode extends DialogueObject{
 
     public DialogueNode(){
         this(INVALID_OBJECT, EMPTY_MSG);
+    }
+
+    public DialogueNode copy(){
+        DialogueNode newNode = new DialogueNode();
+        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
+        newNode.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        return newNode;
+    }
+
+    public List<DialogueEffect> getEffects() {
+        return effects;
     }
 
     public DialogueNode(String nodeId){
