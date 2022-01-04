@@ -25,6 +25,7 @@ public class DialogueObject {
         this.rawMessage = rawMessage;
     }
 
+
     public void setDialogueTree(DialogueTree dialogueTree) {
         this.dialogueTree = dialogueTree;
     }
@@ -68,13 +69,16 @@ public class DialogueObject {
     }
 
     public <D> void deserialize(Dynamic<D> dynamic) {
+
         this.rawMessage = dynamic.get("message").asString("");
+        this.id = dynamic.get("id").asString("invalid");
     }
 
 
     public <D> D serialize(DynamicOps<D> ops) {
         return ops.createMap(ImmutableMap.of(
-                ops.createString("message"), ops.createString(rawMessage)
+                ops.createString("message"), ops.createString(rawMessage),
+                ops.createString("id"), ops.createString(id)
         ));
     }
 }

@@ -7,6 +7,8 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,13 @@ public class DialogueResponse {
 
     public DialogueResponse(){
         this(INVALID_RESPONSE_ID);
+    }
+
+    public DialogueResponse copy(){
+        DialogueResponse newResponse = new DialogueResponse();
+        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
+        newResponse.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        return newResponse;
     }
 
     public boolean doesMatchConditions(ServerPlayerEntity player, LivingEntity source){
