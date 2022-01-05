@@ -5,15 +5,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
-import java.util.Stack;
+import java.util.List;
 
-public class PlayerNpcDialogueTreeStackSetupEvent extends PlayerEvent {
+public class PlayerNpcDialogueTreeGatherEvent extends PlayerEvent {
 
-    private final Stack<DialogueTree> treeStack;
+    private final List<DialogueTree> treeStack;
     private final LivingEntity speaker;
 
 
-    public PlayerNpcDialogueTreeStackSetupEvent(PlayerEntity player, LivingEntity speaker, Stack<DialogueTree> treeStack) {
+    public PlayerNpcDialogueTreeGatherEvent(PlayerEntity player, LivingEntity speaker, List<DialogueTree> treeStack) {
         super(player);
         this.treeStack = treeStack;
         this.speaker = speaker;
@@ -24,6 +24,6 @@ public class PlayerNpcDialogueTreeStackSetupEvent extends PlayerEvent {
     }
 
     public void addTree(DialogueTree tree){
-        treeStack.push(tree);
+        treeStack.add(tree);
     }
 }

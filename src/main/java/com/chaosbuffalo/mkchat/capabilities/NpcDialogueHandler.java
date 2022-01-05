@@ -1,10 +1,10 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
 import com.chaosbuffalo.mkchat.ChatConstants;
-import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
+import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
-import com.chaosbuffalo.mkchat.event.PlayerNpcDialogueTreeStackSetupEvent;
+import com.chaosbuffalo.mkchat.event.PlayerNpcDialogueTreeGatherEvent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,14 +22,35 @@ import java.util.*;
 
 public class NpcDialogueHandler implements INpcDialogue{
 
+    public static class PlayerDialogueEntry {
+        public int currentIndex;
+        public final List<DialogueTree> trees;
+
+        public PlayerDialogueEntry(int index, List<DialogueTree> trees){
+            this.trees = trees;
+            this.currentIndex = index;
+        }
+
+        public void cycleIndex(){
+            this.currentIndex++;
+            if (currentIndex >= trees.size()){
+                currentIndex = 0;
+            }
+        }
+    }
+
     private LivingEntity entity;
-    public static final String NO_THANKS = "no thanks";
+    public static final String NO_THANKS = "Talk to me about something else.";
+    public static final DialoguePrompt ADDITIONAL_DIALOGUE = new DialoguePrompt("addTrees", NO_THANKS, NO_THANKS, "More");
+    static {
+        ADDITIONAL_DIALOGUE.compileMessage();
+    }
     private ResourceLocation dialogueName;
-    private Map<UUID, Stack<DialogueTree>> playerDialogueStacks;
-    private List<DialogueTree> additionalTrees = new ArrayList<>();
+    private Map<UUID, PlayerDialogueEntry> playerDialogues;
+    private List<DialogueTree> dialogueTreeNames = new ArrayList<>();
 
     public NpcDialogueHandler(){
-        playerDialogueStacks = new HashMap<>();
+        playerDialogues = new HashMap<>();
     }
 
     @Override
@@ -39,66 +60,58 @@ public class NpcDialogueHandler implements INpcDialogue{
 
     @Override
     public boolean hasDialogue() {
-        return dialogueName != null || additionalTrees.size() > 0 || playerDialogueStacks.size() > 0;
-    }
-
-    public void popState(ServerPlayerEntity player){
-        Stack<DialogueTree> treeStack = playerDialogueStacks.get(player.getUniqueID());
-        if (treeStack != null){
-            if (treeStack.size() > 1) {
-                treeStack.pop();
-            } else {
-                playerDialogueStacks.remove(player.getUniqueID());
-            }
-        }
+        return dialogueName != null || dialogueTreeNames.size() > 0 || playerDialogues.size() > 0;
     }
 
     @Override
     public void addAdditionalDialogueTree(DialogueTree tree){
-        additionalTrees.add(tree);
+        dialogueTreeNames.add(tree);
     }
 
     public void setupDialogueForPlayer(ServerPlayerEntity player){
-        Stack<DialogueTree> playerStack = new Stack<>();
+        List<DialogueTree> playerQue = new ArrayList<>();
         DialogueTree tree = DialogueManager.getDialogueTree(dialogueName);
         if (tree != null){
-            playerStack.push(tree);
+            playerQue.add(tree);
         }
-        for (DialogueTree add : additionalTrees){
-            playerStack.push(add);
-        }
-        MinecraftForge.EVENT_BUS.post(new PlayerNpcDialogueTreeStackSetupEvent(player, getEntity(), playerStack));
-        if (!playerStack.isEmpty()){
-            playerDialogueStacks.put(player.getUniqueID(), playerStack);
+        playerQue.addAll(dialogueTreeNames);
+        MinecraftForge.EVENT_BUS.post(new PlayerNpcDialogueTreeGatherEvent(player, getEntity(), playerQue));
+        if (!playerQue.isEmpty()){
+            playerDialogues.put(player.getUniqueID(), new PlayerDialogueEntry(0, playerQue));
         }
     }
 
-    @Nullable
-    public DialogueTree getTreeForPlayer(ServerPlayerEntity player){
-        if (!playerDialogueStacks.containsKey(player.getUniqueID())){
+    public PlayerDialogueEntry getTreesForPlayer(ServerPlayerEntity player){
+        if (!playerDialogues.containsKey(player.getUniqueID())){
             setupDialogueForPlayer(player);
         }
-        Stack<DialogueTree> dialogues = playerDialogueStacks.get(player.getUniqueID());
-        return dialogues.size() > 0 ? dialogues.peek() : null;
+        return playerDialogues.get(player.getUniqueID());
     }
+
 
     @Override
     public void receiveMessage(ServerPlayerEntity player, String message) {
-        DialogueTree tree = getTreeForPlayer(player);
+        PlayerDialogueEntry entry = getTreesForPlayer(player);
         if (hasDialogue()){
             if (message.equals(NO_THANKS)){
-                popState(player);
+                entry.cycleIndex();
+                startDialogue(player);
+            } else {
+                for (int i = entry.trees.size() - 1; i >= 0; i--) {
+                    DialogueTree tree = entry.trees.get(i);
+                    if (tree.handlePlayerMessage(player, message, entity)) {
+                        return;
+                    }
+                }
             }
-            if (tree != null){
-                tree.handlePlayerMessage(player, message, entity);
-            }
+
         }
     }
 
     @Override
     public void startDialogue(ServerPlayerEntity player) {
-        DialogueTree tree = getTreeForPlayer(player);
-        if (tree != null && tree.getHailPrompt() != null) {
+        PlayerDialogueEntry entry = getTreesForPlayer(player);
+        if (hasDialogue()) {
             if (player.getServer() != null){
                 player.getServer().getPlayerList().sendToAllNearExcept(null,
                         player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
@@ -107,9 +120,20 @@ public class NpcDialogueHandler implements INpcDialogue{
                                 player.getName().getString(), this.getEntity().getName().getString())),
                                 ChatType.CHAT, player.getUniqueID()));
             }
-            tree.getHailPrompt().handlePrompt(player, entity, tree);
-        } else {
-            MKChat.LOGGER.info("Failed to find dialogue {}", getDialogueTreeName());
+
+            for (int i = entry.trees.size() - 1 - entry.currentIndex; i >= 0; i--) {
+                DialogueTree tree = entry.trees.get(i);
+                if (tree.getHailPrompt() != null) {
+                    DialoguePrompt addPrompt = i > 0 ? ADDITIONAL_DIALOGUE : null;
+                    if (tree.getHailPrompt().handlePrompt(player, entity, tree, addPrompt)) {
+                        if (addPrompt == null && entry.trees.size() > 0){
+                            entry.cycleIndex();
+                        }
+                        return;
+                    }
+
+                }
+            }
         }
     }
 

@@ -70,12 +70,15 @@ public class DialogueTree {
     }
 
 
-    public void handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker){
+    public boolean handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker){
         for (DialoguePrompt prompt : prompts.values()){
             if (prompt.doesMatchInput(message)){
-                prompt.handlePrompt(player, speaker, this);
+                if (prompt.handlePrompt(player, speaker, this, null)){
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     public <D> D serialize(DynamicOps<D> ops){

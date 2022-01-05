@@ -10,7 +10,10 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,8 +49,19 @@ public class DialogueNode extends DialogueObject{
     }
 
     public void sendMessage(ServerPlayerEntity player, LivingEntity source){
+        sendMessage(player, source, getMessage(source, player));
+    }
+
+    public void sendMessageWithSibling(ServerPlayerEntity player, LivingEntity source, DialoguePrompt withAdditional){
+
+        IFormattableTextComponent message = getMessage(source, player).deepCopy();
+        message.appendSibling(withAdditional.getPromptLink());
+        sendMessage(player, source, message);
+    }
+
+    public void sendMessage(ServerPlayerEntity player, LivingEntity source, ITextComponent message){
         if (player.getServer() != null){
-            DialogueUtils.sendMessageToAllAround(player.getServer(), source, getMessage(source, player));
+            DialogueUtils.sendMessageToAllAround(player.getServer(), source, message);
             for (DialogueEffect effect : effects){
                 effect.applyEffect(player, source, this);
             }
