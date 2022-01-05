@@ -6,6 +6,7 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -50,8 +51,8 @@ public class DialogueObject {
         this.message = DialogueManager.parseDialogueMessage(rawMessage, dialogueTree);
     }
 
-    public ITextComponent getMessage(LivingEntity source, ServerPlayerEntity target) {
-        ITextComponent name = new StringTextComponent(String.format("<%s> ",
+    public IFormattableTextComponent getMessage(LivingEntity source, ServerPlayerEntity target) {
+        StringTextComponent name = new StringTextComponent(String.format("<%s> ",
                 source.getDisplayName().getString()));
         DialogueContext context = new DialogueContext(source, target, this);
         Stream<ITextComponent> finalMsg = message.getSiblings().stream().map((comp -> {

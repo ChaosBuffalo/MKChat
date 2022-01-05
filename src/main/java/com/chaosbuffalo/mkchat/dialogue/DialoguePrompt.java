@@ -12,6 +12,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,16 +70,21 @@ public class DialoguePrompt extends DialogueObject {
         return String.format("{prompt:%s}", getId());
     }
 
-    public void handlePrompt(ServerPlayerEntity player, LivingEntity source, DialogueTree tree){
+    public boolean handlePrompt(ServerPlayerEntity player, LivingEntity source, DialogueTree tree, @Nullable DialoguePrompt withAdditional){
         for (DialogueResponse response : responses){
             if (response.doesMatchConditions(player, source)){
                 DialogueNode responseNode = tree.getNode(response.getResponseNodeId());
                 if (responseNode != null){
-                    responseNode.sendMessage(player, source);
-                    return;
+                    if (withAdditional != null){
+                        responseNode.sendMessageWithSibling(player, source, withAdditional);
+                    } else {
+                        responseNode.sendMessage(player, source);
+                    }
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     public ITextComponent getPromptLink() {
