@@ -21,14 +21,21 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class NpcDialogueHandler implements INpcDialogue{
+    protected static final int TICK_TIMEOUT = 20 * 60;
 
     public static class PlayerDialogueEntry {
         public int currentIndex;
         public final List<DialogueTree> trees;
+        public int lastTickSeen;
 
-        public PlayerDialogueEntry(int index, List<DialogueTree> trees){
+        public PlayerDialogueEntry(int index, List<DialogueTree> trees, int tickComputed){
             this.trees = trees;
             this.currentIndex = index;
+            this.lastTickSeen = tickComputed;
+        }
+
+        public boolean shouldRecalc(int ticksExisted){
+            return lastTickSeen + TICK_TIMEOUT < ticksExisted;
         }
 
         public void cycleIndex(){
@@ -77,12 +84,12 @@ public class NpcDialogueHandler implements INpcDialogue{
         playerQue.addAll(dialogueTreeNames);
         MinecraftForge.EVENT_BUS.post(new PlayerNpcDialogueTreeGatherEvent(player, getEntity(), playerQue));
         if (!playerQue.isEmpty()){
-            playerDialogues.put(player.getUniqueID(), new PlayerDialogueEntry(0, playerQue));
+            playerDialogues.put(player.getUniqueID(), new PlayerDialogueEntry(0, playerQue, entity.ticksExisted));
         }
     }
 
     public PlayerDialogueEntry getTreesForPlayer(ServerPlayerEntity player){
-        if (!playerDialogues.containsKey(player.getUniqueID())){
+        if (!playerDialogues.containsKey(player.getUniqueID()) || playerDialogues.get(player.getUniqueID()).shouldRecalc(entity.ticksExisted)){
             setupDialogueForPlayer(player);
         }
         return playerDialogues.get(player.getUniqueID());
@@ -95,7 +102,7 @@ public class NpcDialogueHandler implements INpcDialogue{
         if (hasDialogue()){
             if (message.equals(NO_THANKS)){
                 entry.cycleIndex();
-                startDialogue(player);
+                startDialogue(player, true);
             } else {
                 for (int i = entry.trees.size() - 1; i >= 0; i--) {
                     DialogueTree tree = entry.trees.get(i);
@@ -109,10 +116,10 @@ public class NpcDialogueHandler implements INpcDialogue{
     }
 
     @Override
-    public void startDialogue(ServerPlayerEntity player) {
+    public void startDialogue(ServerPlayerEntity player, boolean suppressHail) {
         PlayerDialogueEntry entry = getTreesForPlayer(player);
         if (hasDialogue()) {
-            if (player.getServer() != null){
+            if (player.getServer() != null && !suppressHail){
                 player.getServer().getPlayerList().sendToAllNearExcept(null,
                         player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
                         player.getServerWorld().getDimensionKey(),
@@ -121,15 +128,16 @@ public class NpcDialogueHandler implements INpcDialogue{
                                 ChatType.CHAT, player.getUniqueID()));
             }
 
+
             for (int i = entry.trees.size() - 1 - entry.currentIndex; i >= 0; i--) {
                 DialogueTree tree = entry.trees.get(i);
                 if (tree.getHailPrompt() != null) {
-                    DialoguePrompt addPrompt = i > 0 ? ADDITIONAL_DIALOGUE : null;
+                    DialoguePrompt addPrompt = entry.trees.size() > 1 ? ADDITIONAL_DIALOGUE : null;
+
                     if (tree.getHailPrompt().handlePrompt(player, entity, tree, addPrompt)) {
-                        if (addPrompt == null && entry.trees.size() > 0){
-                            entry.cycleIndex();
-                        }
                         return;
+                    } else {
+                        entry.cycleIndex();
                     }
 
                 }

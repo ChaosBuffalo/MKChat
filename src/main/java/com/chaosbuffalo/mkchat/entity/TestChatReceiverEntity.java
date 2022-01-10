@@ -40,7 +40,7 @@ public class TestChatReceiverEntity extends PigEntity{
     public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
         if (!player.world.isRemote()){
             getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY).ifPresent(cap ->
-                    cap.startDialogue((ServerPlayerEntity) player));
+                    cap.startDialogue((ServerPlayerEntity) player, false));
 
         }
         return ActionResultType.SUCCESS;
