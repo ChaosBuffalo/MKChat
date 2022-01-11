@@ -19,6 +19,7 @@ import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NpcDialogueHandler implements INpcDialogue{
     protected static final int TICK_TIMEOUT = 20 * 60;
@@ -27,6 +28,7 @@ public class NpcDialogueHandler implements INpcDialogue{
         public int currentIndex;
         public final List<DialogueTree> trees;
         public int lastTickSeen;
+        public List<DialogueTree> relevantTrees;
 
         public PlayerDialogueEntry(int index, List<DialogueTree> trees, int tickComputed){
             this.trees = trees;
@@ -40,9 +42,15 @@ public class NpcDialogueHandler implements INpcDialogue{
 
         public void cycleIndex(){
             this.currentIndex++;
-            if (currentIndex >= trees.size()){
+            if (currentIndex >= relevantTrees.size()){
                 currentIndex = 0;
             }
+        }
+
+        public void calcRelevant(ServerPlayerEntity player, LivingEntity entity){
+            this.relevantTrees = trees.stream().filter(x ->
+                    x.getHailPrompt() != null && x.getHailPrompt().willHandle(player, entity)).collect(
+                            Collectors.toList());
         }
     }
 
@@ -72,6 +80,7 @@ public class NpcDialogueHandler implements INpcDialogue{
 
     @Override
     public void addAdditionalDialogueTree(DialogueTree tree){
+        playerDialogues.clear();
         dialogueTreeNames.add(tree);
     }
 
@@ -84,7 +93,9 @@ public class NpcDialogueHandler implements INpcDialogue{
         playerQue.addAll(dialogueTreeNames);
         MinecraftForge.EVENT_BUS.post(new PlayerNpcDialogueTreeGatherEvent(player, getEntity(), playerQue));
         if (!playerQue.isEmpty()){
-            playerDialogues.put(player.getUniqueID(), new PlayerDialogueEntry(0, playerQue, entity.ticksExisted));
+            PlayerDialogueEntry entry = new PlayerDialogueEntry(0, playerQue, entity.ticksExisted);
+            entry.calcRelevant(player, entity);
+            playerDialogues.put(player.getUniqueID(), entry);
         }
     }
 
@@ -100,12 +111,12 @@ public class NpcDialogueHandler implements INpcDialogue{
     public void receiveMessage(ServerPlayerEntity player, String message) {
         PlayerDialogueEntry entry = getTreesForPlayer(player);
         if (hasDialogue()){
-            if (message.equals(NO_THANKS)){
+            if (message.contains(NO_THANKS)){
                 entry.cycleIndex();
                 startDialogue(player, true);
             } else {
-                for (int i = entry.trees.size() - 1; i >= 0; i--) {
-                    DialogueTree tree = entry.trees.get(i);
+                for (int i = entry.relevantTrees.size() - 1; i >= 0; i--) {
+                    DialogueTree tree = entry.relevantTrees.get(i);
                     if (tree.handlePlayerMessage(player, message, entity)) {
                         return;
                     }
@@ -129,17 +140,14 @@ public class NpcDialogueHandler implements INpcDialogue{
             }
 
 
-            for (int i = entry.trees.size() - 1 - entry.currentIndex; i >= 0; i--) {
-                DialogueTree tree = entry.trees.get(i);
-                if (tree.getHailPrompt() != null) {
-                    DialoguePrompt addPrompt = entry.trees.size() > 1 ? ADDITIONAL_DIALOGUE : null;
 
+            for (int i = entry.relevantTrees.size() - 1 - entry.currentIndex; i >= 0; i--) {
+                DialogueTree tree = entry.relevantTrees.get(i);
+                if (tree.getHailPrompt() != null) {
+                    DialoguePrompt addPrompt = entry.relevantTrees.size() > 1 ? ADDITIONAL_DIALOGUE : null;
                     if (tree.getHailPrompt().handlePrompt(player, entity, tree, addPrompt)) {
                         return;
-                    } else {
-                        entry.cycleIndex();
                     }
-
                 }
             }
         }
@@ -148,6 +156,7 @@ public class NpcDialogueHandler implements INpcDialogue{
     @Override
     public void setDialogueTree(ResourceLocation treeName) {
         dialogueName = treeName;
+        playerDialogues.clear();
     }
 
     @Override
