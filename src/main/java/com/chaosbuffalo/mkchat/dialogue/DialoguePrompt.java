@@ -87,6 +87,15 @@ public class DialoguePrompt extends DialogueObject {
         return false;
     }
 
+    public boolean willHandle(ServerPlayerEntity player, LivingEntity source){
+        for (DialogueResponse response : responses) {
+            if (response.doesMatchConditions(player, source)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ITextComponent getPromptLink() {
         StringTextComponent textComponent = new StringTextComponent(String.format("[%s]",
                 getMessage().getString()));
