@@ -14,18 +14,18 @@ public class HasBoolFlagCondition extends DialogueCondition {
     public static final ResourceLocation conditionTypeName = new ResourceLocation(MKChat.MODID, "dialogue_condition.has_bool_flag");
     private ResourceLocation flagName;
 
-    public HasBoolFlagCondition(ResourceLocation flagName){
+    public HasBoolFlagCondition(ResourceLocation flagName) {
         super(conditionTypeName);
         this.flagName = flagName;
     }
 
-    public HasBoolFlagCondition(){
+    public HasBoolFlagCondition() {
         this(AddFlag.INVALID_FLAG);
     }
 
     @Override
     public boolean meetsCondition(ServerPlayerEntity player, LivingEntity source) {
-        if (flagName.equals(AddFlag.INVALID_FLAG)){
+        if (flagName.equals(AddFlag.INVALID_FLAG)) {
             return false;
         }
         return player.getCapability(ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY).map(cap ->
@@ -36,7 +36,10 @@ public class HasBoolFlagCondition extends DialogueCondition {
     @Override
     public <D> void readAdditionalData(Dynamic<D> dynamic) {
         super.readAdditionalData(dynamic);
-        this.flagName = new ResourceLocation(dynamic.get("flagName").asString().result().orElse(AddFlag.INVALID_FLAG.toString()));
+        flagName = dynamic.get("flagName").asString()
+                .resultOrPartial(MKChat.LOGGER::error)
+                .map(ResourceLocation::new)
+                .orElse(AddFlag.INVALID_FLAG);
     }
 
     @Override
