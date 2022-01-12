@@ -38,6 +38,10 @@ public class DialogueResponse {
         return conditions.stream().allMatch(x -> x.checkCondition(player, source));
     }
 
+    public List<DialogueCondition> getConditions() {
+        return conditions;
+    }
+
     public String getResponseNodeId() {
         return responseNodeId;
     }

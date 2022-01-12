@@ -32,17 +32,16 @@ public class HasBoolFlagCondition extends DialogueCondition {
                 cap.getNPCEntry(source.getUniqueID()).getBoolFlag(flagName)).orElse(false);
     }
 
+
     @Override
-    public <D> void deserialize(Dynamic<D> dynamic) {
-        super.deserialize(dynamic);
+    public <D> void readAdditionalData(Dynamic<D> dynamic) {
+        super.readAdditionalData(dynamic);
         this.flagName = new ResourceLocation(dynamic.get("flagName").asString().result().orElse(AddFlag.INVALID_FLAG.toString()));
     }
 
     @Override
-    public <D> D serialize(DynamicOps<D> ops) {
-        D ret = super.serialize(ops);
-        return ops.mergeToMap(ret, ImmutableMap.of(
-                ops.createString("flagName"), ops.createString(flagName.toString())
-        )).result().orElse(ret);
+    public <D> void writeAdditionalData(DynamicOps<D> ops, ImmutableMap.Builder<D, D> builder) {
+        super.writeAdditionalData(ops, builder);
+        builder.put(ops.createString("flagName"), ops.createString(flagName.toString()));
     }
 }

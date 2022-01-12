@@ -41,6 +41,11 @@ minecraft {
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
+        configureEach {
+            //mixins
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+        }
         client {
             workingDirectory project.file('run')
 
@@ -97,26 +102,14 @@ dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft "net.minecraftforge:forge:${forge_version}"
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    compileOnly fg.deobf("com.chaosbuffalo.targeting_api:targeting_api-${mc_version}:${targeting_api_version}")
+    runtimeOnly fg.deobf("com.chaosbuffalo.targeting_api:targeting_api-${mc_version}:${targeting_api_version}")
+    compileOnly fg.deobf("com.chaosbuffalo.mkwidgets:mkwidgets-${mc_version}:${mk_widgets_version}")
+    runtimeOnly fg.deobf("com.chaosbuffalo.mkwidgets:mkwidgets-${mc_version}:${mk_widgets_version}")
+    compileOnly fg.deobf("com.chaosbuffalo.mkcore:mkcore-${mc_version}:${mk_core_version}")
+    runtimeOnly fg.deobf("com.chaosbuffalo.mkcore:mkcore-${mc_version}:${mk_core_version}")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
