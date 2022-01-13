@@ -13,6 +13,7 @@ import com.google.gson.*;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.resources.JsonReloadListener;
+import net.minecraft.item.Item;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -22,6 +23,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -68,12 +70,24 @@ public class DialogueManager extends JsonReloadListener {
                 }
             };
 
+    private static final BiFunction<String, DialogueTree, ITextComponent> itemProvider =
+            (name, tree) -> {
+                ResourceLocation itemId = new ResourceLocation(name);
+                Item item = ForgeRegistries.ITEMS.getValue(itemId);
+                if (item != null){
+                    return item.getName();
+                } else {
+                    return new StringTextComponent(String.format("{item:%s}", name));
+                }
+            };
+
     public static void dialogueSetup(){
         putEffectDeserializer(AddLevelEffect.effectTypeName, AddLevelEffect::new);
         putEffectDeserializer(AddFlag.effectTypeName, AddFlag::new);
         putConditionDeserializer(HasBoolFlagCondition.conditionTypeName, HasBoolFlagCondition::new);
         putTextComponentProvider("context", contextProvider);
         putTextComponentProvider("prompt", promptProvider);
+        putTextComponentProvider("item", itemProvider);
         putContextArgProvider("player_name", playerNameProvider);
         putContextArgProvider("entity_name", entityNameProvider);
     }
