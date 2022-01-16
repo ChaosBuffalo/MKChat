@@ -129,6 +129,9 @@ public class NpcDialogueHandler implements INpcDialogue{
     @Override
     public void startDialogue(ServerPlayerEntity player, boolean suppressHail) {
         PlayerDialogueEntry entry = getTreesForPlayer(player);
+        if (!suppressHail){
+            entry.calcRelevant(player, entity);
+        }
         if (hasDialogue()) {
             if (player.getServer() != null && !suppressHail){
                 player.getServer().getPlayerList().sendToAllNearExcept(null,
@@ -138,9 +141,6 @@ public class NpcDialogueHandler implements INpcDialogue{
                                 player.getName().getString(), this.getEntity().getName().getString())),
                                 ChatType.CHAT, player.getUniqueID()));
             }
-
-
-
             for (int i = entry.relevantTrees.size() - 1 - entry.currentIndex; i >= 0; i--) {
                 DialogueTree tree = entry.relevantTrees.get(i);
                 if (tree.getHailPrompt() != null) {
