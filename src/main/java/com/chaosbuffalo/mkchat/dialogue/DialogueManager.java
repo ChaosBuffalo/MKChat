@@ -19,6 +19,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -75,7 +76,7 @@ public class DialogueManager extends JsonReloadListener {
                 ResourceLocation itemId = new ResourceLocation(name);
                 Item item = ForgeRegistries.ITEMS.getValue(itemId);
                 if (item != null){
-                    return item.getName();
+                    return new TranslationTextComponent(item.getTranslationKey());
                 } else {
                     return new StringTextComponent(String.format("{item:%s}", name));
                 }
