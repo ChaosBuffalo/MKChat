@@ -1,6 +1,7 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
 import com.chaosbuffalo.mkchat.ChatConstants;
+import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
 import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
@@ -48,9 +49,16 @@ public class NpcDialogueHandler implements INpcDialogue{
         }
 
         public void calcRelevant(ServerPlayerEntity player, LivingEntity entity){
-            this.relevantTrees = trees.stream().filter(x ->
-                    x.getHailPrompt() != null && x.getHailPrompt().willHandle(player, entity)).collect(
-                            Collectors.toList());
+            this.relevantTrees = trees.stream().filter(x -> {
+                        MKChat.LOGGER.debug("Checking Dialogue Tree {} relevance for player {}", x.getDialogueName(), player);
+                        return x.getHailPrompt() != null && x.getHailPrompt().willHandle(player, entity);
+                    }).collect(
+                    Collectors.toList());
+
+            MKChat.LOGGER.debug("Calculated relevant trees for player: {}", player);
+            for (DialogueTree tree : relevantTrees){
+                MKChat.LOGGER.debug("Added: {}", tree.getDialogueName());
+            }
         }
     }
 
@@ -130,7 +138,7 @@ public class NpcDialogueHandler implements INpcDialogue{
     public void startDialogue(ServerPlayerEntity player, boolean suppressHail) {
         PlayerDialogueEntry entry = getTreesForPlayer(player);
         if (!suppressHail){
-            entry.calcRelevant(player, entity);
+            setupDialogueForPlayer(player);
         }
         if (hasDialogue()) {
             if (player.getServer() != null && !suppressHail){
