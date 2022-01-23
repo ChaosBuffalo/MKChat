@@ -24,6 +24,7 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
 
     public boolean checkCondition(ServerPlayerEntity player, LivingEntity source){
         boolean condition = meetsCondition(player, source);
+        MKChat.LOGGER.debug("Player {} meets condition {} {}", player, getTypeName(), invert != condition);
         return invert != condition;
     }
 

@@ -1,5 +1,6 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
+import com.chaosbuffalo.mkchat.MKChat;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
@@ -93,6 +94,7 @@ public class DialoguePrompt extends DialogueObject {
                 return true;
             }
         }
+        MKChat.LOGGER.debug("No responses meet conditions for dialogue for player {}", player);
         return false;
     }
 
