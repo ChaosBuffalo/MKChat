@@ -8,8 +8,6 @@ import java.util.UUID;
 
 public interface IPlayerDialogue extends INBTSerializable<CompoundNBT> {
 
-    void attach(PlayerEntity player);
-
     PlayerEntity getPlayer();
 
     PlayerNPCDialogueEntry getNPCEntry(UUID uuid);

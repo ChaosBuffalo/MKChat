@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PlayerDialogueHandler implements IPlayerDialogue {
-    private PlayerEntity player;
+    private final PlayerEntity player;
     private final Map<UUID, PlayerNPCDialogueEntry> npcEntries;
 
-    public PlayerDialogueHandler(){
+    public PlayerDialogueHandler(PlayerEntity player) {
+        this.player = player;
         this.npcEntries = new HashMap<>();
     }
 
@@ -22,11 +23,6 @@ public class PlayerDialogueHandler implements IPlayerDialogue {
     @Override
     public void cleanHistory() {
         npcEntries.clear();
-    }
-
-    @Override
-    public void attach(PlayerEntity player) {
-        this.player = player;
     }
 
     @Override

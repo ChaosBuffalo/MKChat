@@ -59,23 +59,20 @@ public class NpcDialogueHandler implements INpcDialogue{
         }
     }
 
-    private LivingEntity entity;
+
     public static final String NO_THANKS = "Talk to me about something else.";
     public static final DialoguePrompt ADDITIONAL_DIALOGUE = new DialoguePrompt("addTrees", NO_THANKS, NO_THANKS, "More");
     static {
         ADDITIONAL_DIALOGUE.compileMessage();
     }
+    private final LivingEntity entity;
     private ResourceLocation dialogueName;
-    private Map<UUID, PlayerDialogueEntry> playerDialogues;
-    private List<DialogueTree> dialogueTreeNames = new ArrayList<>();
+    private final Map<UUID, PlayerDialogueEntry> playerDialogues;
+    private final List<DialogueTree> dialogueTreeNames = new ArrayList<>();
 
-    public NpcDialogueHandler(){
+    public NpcDialogueHandler(LivingEntity attached) {
+        this.entity = attached;
         playerDialogues = new HashMap<>();
-    }
-
-    @Override
-    public void attach(LivingEntity entity) {
-        this.entity = entity;
     }
 
     @Override

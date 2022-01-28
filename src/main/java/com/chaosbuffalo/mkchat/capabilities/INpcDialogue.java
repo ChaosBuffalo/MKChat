@@ -11,8 +11,6 @@ import javax.annotation.Nullable;
 
 public interface INpcDialogue extends INBTSerializable<CompoundNBT> {
 
-    void attach(LivingEntity entity);
-
     boolean hasDialogue();
 
     void addAdditionalDialogueTree(DialogueTree tree);
