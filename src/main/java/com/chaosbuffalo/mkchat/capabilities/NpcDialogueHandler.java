@@ -9,14 +9,11 @@ import com.chaosbuffalo.mkchat.event.PlayerNpcDialogueTreeGatherEvent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.network.play.server.SChatPacket;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -186,25 +183,5 @@ public class NpcDialogueHandler implements INpcDialogue{
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
 
-    }
-
-    public static class Storage implements Capability.IStorage<INpcDialogue> {
-
-        @Nullable
-        @Override
-        public INBT writeNBT(Capability<INpcDialogue> capability, INpcDialogue instance, Direction side) {
-            if (instance == null){
-                return null;
-            }
-            return instance.serializeNBT();
-        }
-
-        @Override
-        public void readNBT(Capability<INpcDialogue> capability, INpcDialogue instance, Direction side, INBT nbt) {
-            if (nbt instanceof CompoundNBT && instance != null) {
-                CompoundNBT tag = (CompoundNBT) nbt;
-                instance.deserializeNBT(tag);
-            }
-        }
     }
 }

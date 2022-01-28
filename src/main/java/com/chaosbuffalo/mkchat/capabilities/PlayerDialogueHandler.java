@@ -2,11 +2,7 @@ package com.chaosbuffalo.mkchat.capabilities;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
-import net.minecraftforge.common.capabilities.Capability;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -58,26 +54,6 @@ public class PlayerDialogueHandler implements IPlayerDialogue {
             PlayerNPCDialogueEntry dialogueEntry = new PlayerNPCDialogueEntry(uuid);
             dialogueEntry.deserializeNBT(npcEntriesTag.getCompound(key));
             npcEntries.put(uuid, dialogueEntry);
-        }
-    }
-
-    public static class Storage implements Capability.IStorage<IPlayerDialogue> {
-
-        @Nullable
-        @Override
-        public INBT writeNBT(Capability<IPlayerDialogue> capability, IPlayerDialogue instance, Direction side) {
-            if (instance == null){
-                return null;
-            }
-            return instance.serializeNBT();
-        }
-
-        @Override
-        public void readNBT(Capability<IPlayerDialogue> capability, IPlayerDialogue instance, Direction side, INBT nbt) {
-            if (nbt instanceof CompoundNBT && instance != null) {
-                CompoundNBT tag = (CompoundNBT) nbt;
-                instance.deserializeNBT(tag);
-            }
         }
     }
 }
