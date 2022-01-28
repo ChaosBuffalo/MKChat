@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid=MKChat.MODID, bus=Mod.EventBusSubscriber.Bus.MOD)
 public class DialogueManager extends JsonReloadListener {
+    public static final String DEFINITION_FOLDER = "dialogues";
 
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Map<ResourceLocation, DialogueTree> trees = new HashMap<>();
@@ -155,20 +156,21 @@ public class DialogueManager extends JsonReloadListener {
     }
 
     public DialogueManager() {
-        super(GSON, "dialogues");
+        super(GSON, DEFINITION_FOLDER);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> objectIn,
-                         IResourceManager resourceManagerIn,
-                         IProfiler profilerIn) { ;
+                         @Nullable IResourceManager resourceManagerIn,
+                         @Nullable IProfiler profilerIn) {
         trees.clear();
-        for(Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
             MKChat.LOGGER.info("Found dialogue tree file: {}", resourcelocation);
-            if (resourcelocation.getPath().startsWith("_")) continue; //Forge: filter anything beginning with "_" as it's used for metadata.
+            if (resourcelocation.getPath().startsWith("_"))
+                continue; //Forge: filter anything beginning with "_" as it's used for metadata.
             DialogueTree tree = DialogueTree.deserializeTreeFromDynamic(entry.getKey(),
                     new Dynamic<>(JsonOps.INSTANCE, entry.getValue()));
             tree.bake();
