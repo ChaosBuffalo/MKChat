@@ -17,7 +17,14 @@ public interface INpcDialogue extends INBTSerializable<CompoundNBT> {
 
     void receiveMessage(ServerPlayerEntity player, String message);
 
+    void startDialogue(ServerPlayerEntity player);
+
+    @Deprecated
     void startDialogue(ServerPlayerEntity player, boolean suppressHail);
+
+    default void hail(ServerPlayerEntity player) {
+        startDialogue(player);
+    }
 
     void setDialogueTree(ResourceLocation treeName);
 
