@@ -3,7 +3,6 @@ package com.chaosbuffalo.mkchat.capabilities;
 import com.chaosbuffalo.mkchat.ChatConstants;
 import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
-import com.chaosbuffalo.mkchat.dialogue.DialogueObject;
 import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
 import com.chaosbuffalo.mkchat.event.PlayerNpcDialogueTreeGatherEvent;
@@ -14,7 +13,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -91,8 +89,7 @@ public class NpcDialogueHandler implements INpcDialogue {
 
 
     public static final String NO_THANKS = "Talk to me about something else.";
-    public static final DialoguePrompt ADDITIONAL_DIALOGUE =
-            Util.make(new DialoguePrompt("addTrees", NO_THANKS, NO_THANKS, "More"), DialogueObject::compileMessage);
+    public static final DialoguePrompt ADDITIONAL_DIALOGUE = new DialoguePrompt("nextTree", NO_THANKS, NO_THANKS, "More");
 
     private final LivingEntity entity;
     private final Map<UUID, Conversation> conversations;

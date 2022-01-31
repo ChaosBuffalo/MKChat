@@ -1,16 +1,20 @@
 package com.chaosbuffalo.mkchat.dialogue.conditions;
 
 import com.chaosbuffalo.mkchat.MKChat;
+import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
 import com.chaosbuffalo.mkcore.serialization.IDynamicMapTypedSerializer;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
+import java.util.Optional;
+
 public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
-    public static final ResourceLocation INVALID_CONDITION_TYPE = new ResourceLocation(MKChat.MODID, "dialogue_condition.invalid");
     public static final String TYPE_ENTRY_NAME = "dialogueConditionType";
     private final ResourceLocation conditionType;
     private boolean invert;
@@ -53,8 +57,22 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
         invert = dynamic.get("invert").asBoolean(false);
     }
 
-    public static <D> ResourceLocation getType(Dynamic<D> dynamic){
-        return IDynamicMapTypedSerializer.getType(dynamic, TYPE_ENTRY_NAME).orElse(INVALID_CONDITION_TYPE);
+    public static <D> Optional<ResourceLocation> getType(Dynamic<D> dynamic) {
+        return IDynamicMapTypedSerializer.getType(dynamic, TYPE_ENTRY_NAME);
     }
 
+    @Nonnull
+    public static <D> DataResult<DialogueCondition> fromDynamic(Dynamic<D> dynamic) {
+        Optional<ResourceLocation> type = getType(dynamic);
+        if (!type.isPresent()) {
+            return DataResult.error(String.format("Failed to decode dialogue condition id: %s", dynamic));
+        }
+
+        DialogueCondition cond = DialogueManager.getDialogueCondition(type.get());
+        if (cond == null) {
+            return DataResult.error(String.format("Unable to decode dialogue condition: %s", type.get()));
+        }
+        cond.deserialize(dynamic);
+        return DataResult.success(cond);
+    }
 }

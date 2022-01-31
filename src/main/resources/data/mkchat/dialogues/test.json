@@ -1,12 +1,15 @@
 {
-  "nodes": {
-    "root": {
+  "nodes": [
+    {
+      "id": "root",
       "message": "Hello {context:player_name}, I am {context:entity_name}. Do you {prompt:need_xp}"
     },
-    "cant_help": {
+    {
+      "id": "cant_help",
       "message": "I have already helped you as much as I can."
     },
-    "grant_level": {
+    {
+      "id": "grant_level",
       "message": "Here is 1 level.",
       "effects": [
         {
@@ -19,15 +22,17 @@
         }
       ]
     },
-    "already_granted": {
+    {
+      "id": "already_granted",
       "message": "You already got a level, don't be greedy."
     }
-  },
-  "prompts": {
-    "need_xp": {
+  ],
+  "prompts": [
+    {
+      "id": "need_xp",
       "message": "need some xp",
-      "promptPhrase": "need xp",
-      "promptText": "I need xp.",
+      "triggerPhrase": "need xp",
+      "suggestedText": "I need xp.",
       "responses": [
         {
           "responseNodeId": "grant_level",
@@ -51,10 +56,11 @@
         }
       ]
     },
-    "hail": {
+    {
+      "id": "hail",
       "message": "",
-      "promptPhrase": "",
-      "promptText": "",
+      "triggerPhrase": "",
+      "suggestedText": "",
       "responses": [
         {
           "responseNodeId": "root",
@@ -78,6 +84,6 @@
         }
       ]
     }
-  },
+  ],
   "hailPrompt": "hail"
 }
