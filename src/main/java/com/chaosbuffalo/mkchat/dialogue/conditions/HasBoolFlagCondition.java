@@ -1,7 +1,8 @@
 package com.chaosbuffalo.mkchat.dialogue.conditions;
 
 import com.chaosbuffalo.mkchat.MKChat;
-import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
+import com.chaosbuffalo.mkchat.capabilities.IPlayerDialogue;
+import com.chaosbuffalo.mkchat.dialogue.DialogueUtils;
 import com.chaosbuffalo.mkchat.dialogue.effects.AddFlag;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
@@ -28,16 +29,16 @@ public class HasBoolFlagCondition extends DialogueCondition {
         if (flagName.equals(AddFlag.INVALID_FLAG)) {
             return false;
         }
-        return player.getCapability(ChatCapabilities.PLAYER_DIALOGUE_CAPABILITY).map(cap ->
-                cap.getNPCEntry(source.getUniqueID()).getBoolFlag(flagName)).orElse(false);
+        return IPlayerDialogue.get(player)
+                .map(cap -> cap.getConversationMemory(source).getBoolFlag(flagName))
+                .orElse(false);
     }
-
 
     @Override
     public <D> void readAdditionalData(Dynamic<D> dynamic) {
         super.readAdditionalData(dynamic);
         flagName = dynamic.get("flagName").asString()
-                .resultOrPartial(MKChat.LOGGER::error)
+                .resultOrPartial(DialogueUtils::throwParseException)
                 .map(ResourceLocation::new)
                 .orElse(AddFlag.INVALID_FLAG);
     }

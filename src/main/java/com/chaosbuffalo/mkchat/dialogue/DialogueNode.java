@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.OptionalDynamic;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.INBT;
@@ -95,6 +96,12 @@ public class DialogueNode extends DialogueObject {
             return DataResult.success(prompt);
         }
         return DataResult.error(String.format("Unable to decode dialogue node: %s", name.get()));
+    }
+
+    public static <D> DialogueNode fromDynamicField(OptionalDynamic<D> dynamic) {
+        return dynamic.flatMap(DialogueNode::fromDynamic)
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override

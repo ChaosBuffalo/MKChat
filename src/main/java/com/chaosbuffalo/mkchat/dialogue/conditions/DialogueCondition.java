@@ -38,11 +38,6 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
     }
 
     @Override
-    public <D> void writeAdditionalData(DynamicOps<D> ops, ImmutableMap.Builder<D, D> builder) {
-        builder.put(ops.createString("invert"), ops.createBoolean(invert));
-    }
-
-    @Override
     public ResourceLocation getTypeName() {
         return conditionType;
     }
@@ -55,6 +50,11 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
     @Override
     public <D> void readAdditionalData(Dynamic<D> dynamic) {
         invert = dynamic.get("invert").asBoolean(false);
+    }
+
+    @Override
+    public <D> void writeAdditionalData(DynamicOps<D> ops, ImmutableMap.Builder<D, D> builder) {
+        builder.put(ops.createString("invert"), ops.createBoolean(invert));
     }
 
     public static <D> Optional<ResourceLocation> getType(Dynamic<D> dynamic) {
