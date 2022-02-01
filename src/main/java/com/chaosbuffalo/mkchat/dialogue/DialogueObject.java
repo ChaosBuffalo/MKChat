@@ -1,6 +1,5 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
-import com.chaosbuffalo.mkchat.MKChat;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
@@ -49,7 +48,7 @@ public class DialogueObject {
     }
 
     protected static <D> Optional<String> decodeKey(Dynamic<D> dynamic) {
-        return dynamic.get("id").asString().resultOrPartial(MKChat.LOGGER::error);
+        return dynamic.get("id").asString().resultOrPartial(DialogueUtils::throwParseException);
     }
 
     public final <D> D serialize(DynamicOps<D> ops) {
@@ -62,10 +61,10 @@ public class DialogueObject {
 
     public final <D> void deserialize(Dynamic<D> dynamic) {
         id = decodeKey(dynamic)
-                .orElseThrow(DialogueDataParsingException::new);
+                .orElseThrow(IllegalStateException::new);
         rawMessage = dynamic.get("message").asString()
-                .resultOrPartial(MKChat.LOGGER::error)
-                .orElseThrow(DialogueDataParsingException::new);
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
         compiledMessage = Lazy.of(() -> DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree()));
         readAdditionalData(dynamic);
     }

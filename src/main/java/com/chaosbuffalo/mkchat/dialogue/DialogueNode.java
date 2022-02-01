@@ -1,6 +1,5 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
-import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.effects.DialogueEffect;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
@@ -14,7 +13,6 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -113,8 +111,6 @@ public class DialogueNode extends DialogueObject {
         effects.clear();
         dynamic.get("effects")
                 .asList(DialogueEffect::fromDynamic)
-                .forEach(dr -> dr.resultOrPartial(MKChat.LOGGER::error)
-                        .map(effects::add)
-                        .orElseThrow(DialogueDataParsingException::new));
+                .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(effects::add));
     }
 }

@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class DialoguePrompt extends DialogueObject {
     public static final String EMPTY_TRIGGER_PHRASE = "";
@@ -92,6 +93,9 @@ public class DialoguePrompt extends DialogueObject {
                         responseNode.sendMessage(player, source);
                     }
                     return true;
+                } else {
+                    throw new DialogueElementMissingException("Node '%s' was not found. Needed by prompt '%s' in tree '%s'",
+                            response.getResponseNodeId(), getId(), tree.getDialogueName());
                 }
             }
         }
@@ -108,6 +112,10 @@ public class DialoguePrompt extends DialogueObject {
                 .appendString("]")
                 .mergeStyle(TextFormatting.AQUA)
                 .modifyStyle(s -> s.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getSuggestion())));
+    }
+
+    public Stream<String> getRequiredNodes() {
+        return responses.stream().map(DialogueResponse::getResponseNodeId);
     }
 
     public static <D> DataResult<DialoguePrompt> fromDynamic(Dynamic<D> dynamic) {
@@ -138,14 +146,13 @@ public class DialoguePrompt extends DialogueObject {
     public <D> void readAdditionalData(Dynamic<D> dynamic) {
         super.readAdditionalData(dynamic);
         triggerPhrase = dynamic.get("triggerPhrase").asString()
-                .resultOrPartial(MKChat.LOGGER::error)
-                .orElseThrow(DialogueDataParsingException::new);
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
         suggestionFillText = dynamic.get("suggestedText").asString()
-                .resultOrPartial(MKChat.LOGGER::error)
-                .orElseThrow(DialogueDataParsingException::new);
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
         responses.clear();
         dynamic.get("responses").asList(DialogueResponse::fromDynamic)
-                .forEach(dr -> dr.resultOrPartial(MKChat.LOGGER::error)
-                        .map(responses::add).orElseThrow(DialogueDataParsingException::new));
+                .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(responses::add));
     }
 }

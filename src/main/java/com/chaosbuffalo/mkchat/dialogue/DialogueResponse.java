@@ -1,6 +1,5 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
-import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.conditions.DialogueCondition;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
@@ -68,17 +67,16 @@ public class DialogueResponse {
     }
 
     private static <D> Optional<String> decodeKey(Dynamic<D> dynamic) {
-        return dynamic.get("responseNodeId").asString().resultOrPartial(MKChat.LOGGER::error);
+        return dynamic.get("responseNodeId").asString().resultOrPartial(DialogueUtils::throwParseException);
     }
 
     public <D> void deserialize(Dynamic<D> dynamic) {
         responseNodeId = decodeKey(dynamic)
-                .orElseThrow(DialogueDataParsingException::new);
+                .orElseThrow(IllegalStateException::new);
         conditions.clear();
         dynamic.get("conditions")
                 .asList(DialogueCondition::fromDynamic)
-                .forEach(dr -> dr.resultOrPartial(MKChat.LOGGER::error)
-                        .map(conditions::add).orElseThrow(DialogueDataParsingException::new));
+                .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(conditions::add));
     }
 
     public <D> D serialize(DynamicOps<D> ops) {

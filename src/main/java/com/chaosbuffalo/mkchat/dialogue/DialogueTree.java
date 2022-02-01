@@ -1,6 +1,5 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
-import com.chaosbuffalo.mkchat.MKChat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
@@ -57,6 +56,12 @@ public class DialogueTree {
     public void addPrompt(DialoguePrompt prompt) {
         prompts.put(prompt.getId(), prompt);
         prompt.setDialogueTree(this);
+        prompt.getRequiredNodes().forEach(nodeId -> {
+            DialogueNode node = getNode(nodeId);
+            if (node == null) {
+                throw new DialogueElementMissingException("Dialogue node '%s' needed by prompt '%s' was missing from tree '%s'", nodeId, prompt.getId(), getDialogueName());
+            }
+        });
     }
 
     public boolean handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker) {
@@ -96,20 +101,21 @@ public class DialogueTree {
     public <D> void deserialize(Dynamic<D> dynamic) {
         nodes.clear();
         dynamic.get("nodes").asList(DialogueNode::fromDynamic)
-                .forEach(dr -> dr.resultOrPartial(MKChat.LOGGER::error).map(node -> {
-                    addNode(node);
-                    return node;
-                }).orElseThrow(DialogueDataParsingException::new));
+                .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(this::addNode));
 
         prompts.clear();
         dynamic.get("prompts").asList(DialoguePrompt::fromDynamic)
-                .forEach(dr -> dr.resultOrPartial(MKChat.LOGGER::error).map(prompt -> {
-                    addPrompt(prompt);
-                    return prompt;
-                }).orElseThrow(DialogueDataParsingException::new));
+                .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(this::addPrompt));
 
         dynamic.get("hailPrompt").asString()
-                .resultOrPartial(MKChat.LOGGER::error)
-                .ifPresent(s -> setHailPrompt(getPrompt(s)));
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .ifPresent(s -> {
+                    DialoguePrompt prompt = getPrompt(s);
+                    if (prompt != null) {
+                        setHailPrompt(prompt);
+                    } else {
+                        throw new DialogueElementMissingException("Hail prompt '%s' not found in tree '%s'", s, getDialogueName());
+                    }
+                });
     }
 }

@@ -1,5 +1,6 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
+import com.chaosbuffalo.mkchat.MKChat;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,7 +14,7 @@ public class DialogueUtils {
     private static final double CHAT_RADIUS = 5.0;
 
     public static void sendMessageToAllAround(MinecraftServer server, LivingEntity source,
-                                              ITextComponent message){
+                                              ITextComponent message) {
         server.getPlayerList().sendToAllNearExcept(null,
                 source.getPosX(), source.getPosY(), source.getPosZ(), CHAT_RADIUS,
                 source.getEntityWorld().getDimensionKey(),
@@ -21,11 +22,16 @@ public class DialogueUtils {
 
     }
 
-    public static String getItemNameProvider(Item item){
+    public static String getItemNameProvider(Item item) {
         return String.format("{item:%s}", item.getRegistryName().toString());
     }
 
-    public static String getStackCountItemProvider(ItemStack item){
+    public static String getStackCountItemProvider(ItemStack item) {
         return String.format("%d {item:%s}", item.getCount(), item.getItem().getRegistryName().toString());
+    }
+
+    public static void throwParseException(String message) {
+        MKChat.LOGGER.error(message);
+        throw new DialogueDataParsingException(message);
     }
 }
