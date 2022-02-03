@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.OptionalDynamic;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.INBT;
@@ -22,6 +23,10 @@ public class DialogueResponse {
     public DialogueResponse(String nodeId) {
         this.responseNodeId = nodeId;
         this.conditions = new ArrayList<>();
+    }
+
+    public DialogueResponse(DialogueNode node) {
+        this(node.getId());
     }
 
     public String getResponseNodeId() {
@@ -64,6 +69,12 @@ public class DialogueResponse {
             return DataResult.success(resp);
         }
         return DataResult.error(String.format("Unable to decode dialogue response: %s", name.get()));
+    }
+
+    public static <D> DialogueResponse fromDynamicField(OptionalDynamic<D> dynamic) {
+        return dynamic.flatMap(DialogueResponse::fromDynamic)
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
     }
 
     private static <D> Optional<String> decodeKey(Dynamic<D> dynamic) {

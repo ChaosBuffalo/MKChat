@@ -26,12 +26,8 @@ public class DialogueTree {
     }
 
     public void addNode(DialogueNode node) {
-        nodes.put(node.getId(), node);
         node.setDialogueTree(this);
-    }
-
-    public void setHailPrompt(DialoguePrompt hailPrompt) {
-        this.hailPrompt = hailPrompt;
+        nodes.put(node.getId(), node);
     }
 
     @Nullable
@@ -48,13 +44,7 @@ public class DialogueTree {
         return prompts.get(name);
     }
 
-    @Nullable
-    public DialoguePrompt getHailPrompt() {
-        return hailPrompt;
-    }
-
     public void addPrompt(DialoguePrompt prompt) {
-        prompts.put(prompt.getId(), prompt);
         prompt.setDialogueTree(this);
         prompt.getRequiredNodes().forEach(nodeId -> {
             DialogueNode node = getNode(nodeId);
@@ -62,6 +52,16 @@ public class DialogueTree {
                 throw new DialogueElementMissingException("Dialogue node '%s' needed by prompt '%s' was missing from tree '%s'", nodeId, prompt.getId(), getDialogueName());
             }
         });
+        prompts.put(prompt.getId(), prompt);
+    }
+
+    @Nullable
+    public DialoguePrompt getHailPrompt() {
+        return hailPrompt;
+    }
+
+    public void setHailPrompt(DialoguePrompt hailPrompt) {
+        this.hailPrompt = hailPrompt;
     }
 
     public boolean handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker) {

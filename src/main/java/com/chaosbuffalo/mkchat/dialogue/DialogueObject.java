@@ -20,7 +20,7 @@ public class DialogueObject {
     public DialogueObject(String id, String rawMessage) {
         this.id = id;
         this.rawMessage = rawMessage;
-        compiledMessage = Lazy.of(() -> DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree()));
+        buildMessageSupplier();
     }
 
     public String getId() {
@@ -47,6 +47,16 @@ public class DialogueObject {
         return !getId().equals(INVALID_OBJECT);
     }
 
+    private void buildMessageSupplier() {
+        compiledMessage = Lazy.of(() -> {
+            if (getDialogueTree() == null)
+                throw new DialogueElementMissingException(
+                        "Dialogue object '%s' was attempted to be compiled without a tree! Raw Message '%s'",
+                        getId(), getRawMessage());
+            return DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree());
+        });
+    }
+
     protected static <D> Optional<String> decodeKey(Dynamic<D> dynamic) {
         return dynamic.get("id").asString().resultOrPartial(DialogueUtils::throwParseException);
     }
@@ -65,8 +75,8 @@ public class DialogueObject {
         rawMessage = dynamic.get("message").asString()
                 .resultOrPartial(DialogueUtils::throwParseException)
                 .orElseThrow(IllegalStateException::new);
-        compiledMessage = Lazy.of(() -> DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree()));
         readAdditionalData(dynamic);
+        buildMessageSupplier();
     }
 
     public <D> void readAdditionalData(Dynamic<D> dynamic) {

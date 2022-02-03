@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.OptionalDynamic;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.INBT;
@@ -130,6 +131,12 @@ public class DialoguePrompt extends DialogueObject {
             return DataResult.success(prompt);
         }
         return DataResult.error(String.format("Unable to decode dialogue prompt: %s", nameResult.get()));
+    }
+
+    public static <D> DialoguePrompt fromDynamicField(OptionalDynamic<D> dynamic) {
+        return dynamic.flatMap(DialoguePrompt::fromDynamic)
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override
