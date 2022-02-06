@@ -6,12 +6,11 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nullable;
 
 public interface INpcDialogue extends INBTSerializable<CompoundNBT> {
-
-    void attach(LivingEntity entity);
 
     boolean hasDialogue();
 
@@ -19,7 +18,14 @@ public interface INpcDialogue extends INBTSerializable<CompoundNBT> {
 
     void receiveMessage(ServerPlayerEntity player, String message);
 
+    void startDialogue(ServerPlayerEntity player);
+
+    @Deprecated
     void startDialogue(ServerPlayerEntity player, boolean suppressHail);
+
+    default void hail(ServerPlayerEntity player) {
+        startDialogue(player);
+    }
 
     void setDialogueTree(ResourceLocation treeName);
 
@@ -27,4 +33,8 @@ public interface INpcDialogue extends INBTSerializable<CompoundNBT> {
 
     @Nullable
     ResourceLocation getDialogueTreeName();
+
+    static LazyOptional<INpcDialogue> get(LivingEntity entity) {
+        return entity.getCapability(ChatCapabilities.NPC_DIALOGUE_CAPABILITY);
+    }
 }

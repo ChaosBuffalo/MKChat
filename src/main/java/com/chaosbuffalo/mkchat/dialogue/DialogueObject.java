@@ -1,38 +1,38 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
-import com.chaosbuffalo.mkchat.MKChat;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.common.util.Lazy;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class DialogueObject {
     public static final String INVALID_OBJECT = "invalid";
     public static final String EMPTY_MSG = "";
-    private String rawMessage;
-    private ITextComponent message;
     private String id;
+    private String rawMessage;
     private DialogueTree dialogueTree;
+    private Supplier<ITextComponent> compiledMessage;
 
-    public DialogueObject(String id, String rawMessage){
+    public DialogueObject(String id, String rawMessage) {
         this.id = id;
         this.rawMessage = rawMessage;
-    }
-
-
-    public void setDialogueTree(DialogueTree dialogueTree) {
-        this.dialogueTree = dialogueTree;
+        buildMessageSupplier();
     }
 
     public String getId() {
         return id;
+    }
+
+    private String getRawMessage() {
+        return rawMessage;
+    }
+
+    public void setDialogueTree(DialogueTree dialogueTree) {
+        this.dialogueTree = dialogueTree;
     }
 
     public DialogueTree getDialogueTree() {
@@ -40,46 +40,48 @@ public class DialogueObject {
     }
 
     public ITextComponent getMessage() {
-        return message;
+        return compiledMessage.get();
     }
 
-    public boolean isValid(){
+    public boolean isValid() {
         return !getId().equals(INVALID_OBJECT);
     }
 
-    public void compileMessage(){
-        this.message = DialogueManager.parseDialogueMessage(rawMessage, dialogueTree);
+    private void buildMessageSupplier() {
+        compiledMessage = Lazy.of(() -> {
+            if (getDialogueTree() == null)
+                throw new DialogueElementMissingException(
+                        "Dialogue object '%s' was attempted to be compiled without a tree! Raw Message '%s'",
+                        getId(), getRawMessage());
+            return DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree());
+        });
     }
 
-    public IFormattableTextComponent getMessage(LivingEntity source, ServerPlayerEntity target) {
-        StringTextComponent name = new StringTextComponent(String.format("<%s> ",
-                source.getDisplayName().getString()));
-        DialogueContext context = new DialogueContext(source, target, this);
-        Stream<ITextComponent> finalMsg = message.getSiblings().stream().map((comp -> {
-            if (comp instanceof ContextAwareTextComponent){
-                return ((ContextAwareTextComponent) comp).getContextFormattedTextComponent(context);
-            } else {
-                return comp;
-            }
-        }));
-        for (ITextComponent comp : finalMsg.collect(Collectors.toList())){
-            MKChat.LOGGER.info("Comp: {}", comp);
-            name.getSiblings().add(comp);
-        }
-        return name;
+    protected static <D> Optional<String> decodeKey(Dynamic<D> dynamic) {
+        return dynamic.get("id").asString().resultOrPartial(DialogueUtils::throwParseException);
     }
 
-    public <D> void deserialize(Dynamic<D> dynamic) {
-
-        this.rawMessage = dynamic.get("message").asString("");
-        this.id = dynamic.get("id").asString("invalid");
+    public final <D> D serialize(DynamicOps<D> ops) {
+        ImmutableMap.Builder<D, D> builder = ImmutableMap.builder();
+        builder.put(ops.createString("id"), ops.createString(id));
+        builder.put(ops.createString("message"), ops.createString(rawMessage));
+        writeAdditionalData(ops, builder);
+        return ops.createMap(builder.build());
     }
 
+    public final <D> void deserialize(Dynamic<D> dynamic) {
+        id = decodeKey(dynamic)
+                .orElseThrow(IllegalStateException::new);
+        rawMessage = dynamic.get("message").asString()
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
+        readAdditionalData(dynamic);
+        buildMessageSupplier();
+    }
 
-    public <D> D serialize(DynamicOps<D> ops) {
-        return ops.createMap(ImmutableMap.of(
-                ops.createString("message"), ops.createString(rawMessage),
-                ops.createString("id"), ops.createString(id)
-        ));
+    public <D> void readAdditionalData(Dynamic<D> dynamic) {
+    }
+
+    public <D> void writeAdditionalData(DynamicOps<D> ops, ImmutableMap.Builder<D, D> builder) {
     }
 }

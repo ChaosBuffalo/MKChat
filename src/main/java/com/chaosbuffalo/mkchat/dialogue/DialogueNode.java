@@ -1,36 +1,37 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
 import com.chaosbuffalo.mkchat.dialogue.effects.DialogueEffect;
-import com.chaosbuffalo.mkchat.dialogue.effects.InvalidEffect;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.OptionalDynamic;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class DialogueNode extends DialogueObject{
+public class DialogueNode extends DialogueObject {
     private final List<DialogueEffect> effects;
 
-    public DialogueNode(String nodeId, String rawMessage){
+    public DialogueNode(String nodeId, String rawMessage) {
         super(nodeId, rawMessage);
         this.effects = new ArrayList<>();
     }
 
-    public DialogueNode(){
-        this(INVALID_OBJECT, EMPTY_MSG);
+    public DialogueNode(String nodeId) {
+        this(nodeId, EMPTY_MSG);
     }
 
-    public DialogueNode copy(){
-        DialogueNode newNode = new DialogueNode();
+    public DialogueNode copy() {
+        DialogueNode newNode = new DialogueNode(getId());
         INBT nbt = serialize(NBTDynamicOps.INSTANCE);
         newNode.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
         return newNode;
@@ -40,54 +41,83 @@ public class DialogueNode extends DialogueObject{
         return effects;
     }
 
-    public DialogueNode(String nodeId){
-        this(nodeId, EMPTY_MSG);
-    }
-
-    public void addEffect(DialogueEffect effect){
+    public void addEffect(DialogueEffect effect) {
         this.effects.add(effect);
     }
 
-    public void sendMessage(ServerPlayerEntity player, LivingEntity source){
-        sendMessage(player, source, getMessage(source, player));
+    public IFormattableTextComponent getSpeakerMessage(LivingEntity speaker, ServerPlayerEntity player) {
+        // Generate a string that looks like: "<speaker_name> {message}"
+        IFormattableTextComponent msg = new StringTextComponent("<")
+                .appendSibling(speaker.getDisplayName())
+                .appendString("> ");
+
+        DialogueContext context = new DialogueContext(speaker, player, this);
+        getMessage().getSiblings().stream().map(comp -> {
+            if (comp instanceof ContextAwareTextComponent) {
+                return ((ContextAwareTextComponent) comp).getContextFormattedTextComponent(context);
+            } else {
+                return comp.deepCopy();
+            }
+        }).forEach(msg::appendSibling);
+        return msg;
     }
 
-    public void sendMessageWithSibling(ServerPlayerEntity player, LivingEntity source, DialoguePrompt withAdditional){
+    public void sendMessage(ServerPlayerEntity player, LivingEntity source) {
+        sendMessage(player, source, getSpeakerMessage(source, player));
+    }
 
-        IFormattableTextComponent message = getMessage(source, player).deepCopy();
-        message.appendSibling(withAdditional.getPromptLink());
+    public void sendMessageWithSibling(ServerPlayerEntity player, LivingEntity source,
+                                       DialoguePrompt withAdditional) {
+        IFormattableTextComponent message = getSpeakerMessage(source, player)
+                .appendString(" ")
+                .appendSibling(withAdditional.getPromptLink());
+
         sendMessage(player, source, message);
     }
 
-    public void sendMessage(ServerPlayerEntity player, LivingEntity source, ITextComponent message){
-        if (player.getServer() != null){
+    private void sendMessage(ServerPlayerEntity player, LivingEntity source, ITextComponent message) {
+        if (player.getServer() != null) {
             DialogueUtils.sendMessageToAllAround(player.getServer(), source, message);
-            for (DialogueEffect effect : effects){
+            for (DialogueEffect effect : effects) {
                 effect.applyEffect(player, source, this);
             }
         }
     }
 
-    @Override
-    public <D> D serialize(DynamicOps<D> ops) {
-        D ret = super.serialize(ops);
-        if (effects.size() > 0){
-            ret = ops.mergeToMap(ret, ImmutableMap.of(
-                    ops.createString("effects"), ops.createList(effects.stream().map(x -> x.serialize(ops)))
-            )).result().orElse(ret);
+    public static <D> DataResult<DialogueNode> fromDynamic(Dynamic<D> dynamic) {
+        Optional<String> name = decodeKey(dynamic);
+        if (!name.isPresent()) {
+            return DataResult.error(String.format("Failed to decode dialogue node id: %s", dynamic));
         }
-        return ret;
+
+        DialogueNode prompt = new DialogueNode(name.get());
+        prompt.deserialize(dynamic);
+        if (prompt.isValid()) {
+            return DataResult.success(prompt);
+        }
+        return DataResult.error(String.format("Unable to decode dialogue node: %s", name.get()));
+    }
+
+    public static <D> DialogueNode fromDynamicField(OptionalDynamic<D> dynamic) {
+        return dynamic.flatMap(DialogueNode::fromDynamic)
+                .resultOrPartial(DialogueUtils::throwParseException)
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override
-    public <D> void deserialize(Dynamic<D> dynamic) {
-        super.deserialize(dynamic);
-        List<DialogueEffect> deserializedEffects = dynamic.get("effects").asList(DialogueManager::deserializeEffect);
-        effects.clear();
-        for (DialogueEffect effect : deserializedEffects){
-            if (!effect.equals(InvalidEffect.INVALID_EFFECT)){
-                effects.add(effect);
-            }
+    public <D> void writeAdditionalData(DynamicOps<D> ops, ImmutableMap.Builder<D, D> builder) {
+        super.writeAdditionalData(ops, builder);
+        if (effects.size() > 0) {
+            builder.put(ops.createString("effects"), ops.createList(effects.stream().map(x -> x.serialize(ops))));
         }
+    }
+
+    @Override
+    public <D> void readAdditionalData(Dynamic<D> dynamic) {
+        super.readAdditionalData(dynamic);
+        effects.clear();
+        dynamic.get("effects")
+                .asList(DialogueEffect::fromDynamic)
+                .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(effects::add));
     }
 }

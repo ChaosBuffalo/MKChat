@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class DialogueDataProvider implements IDataProvider {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -81,7 +82,8 @@ public class DialogueDataProvider implements IDataProvider {
     public void writeDialogue(DialogueTree dialogue, @Nonnull DirectoryCache cache){
         Path outputFolder = this.generator.getOutputFolder();
         ResourceLocation key = dialogue.getDialogueName();
-        Path path = outputFolder.resolve("data/" + key.getNamespace() + "/dialogues/" + key.getPath() + ".json");
+        Path local = Paths.get("data", key.getNamespace(), DialogueManager.DEFINITION_FOLDER, key.getPath() + ".json");
+        Path path = outputFolder.resolve(local);
         try {
             JsonElement element = dialogue.serialize(JsonOps.INSTANCE);
             IDataProvider.save(GSON, cache, element, path);
