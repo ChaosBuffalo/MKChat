@@ -5,7 +5,7 @@ import net.minecraftforge.common.capabilities.Capability;
 
 public class PlayerDialogueProvider extends ChatCapabilities.Provider<PlayerEntity, IPlayerDialogue> {
 
-    public PlayerDialogueProvider(PlayerEntity player){
+    public PlayerDialogueProvider(PlayerEntity player) {
         super(player);
     }
 

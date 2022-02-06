@@ -5,10 +5,8 @@ import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
 import com.chaosbuffalo.mkchat.command.ChatCommands;
 import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
 import com.chaosbuffalo.mkchat.dialogue.IDialogueExtension;
-import com.chaosbuffalo.mkchat.event.DialogueManagerSetupEvent;
 import com.chaosbuffalo.mkchat.init.ChatEntityTypes;
 import net.minecraft.client.renderer.entity.PigRenderer;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,15 +15,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(MKChat.MODID)
-public class MKChat
-{
+public class MKChat {
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "mkchat";
@@ -47,18 +43,17 @@ public class MKChat
     }
 
     @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event){
+    public void onRegisterCommands(RegisterCommandsEvent event) {
         ChatCommands.register(event.getDispatcher());
     }
 
-    private void setup(final FMLCommonSetupEvent event){
+    private void setup(final FMLCommonSetupEvent event) {
         ChatCapabilities.registerCapabilities();
         DialogueManager.dialogueSetup();
     }
 
 
-    private void processIMC(final InterModProcessEvent event)
-    {
+    private void processIMC(final InterModProcessEvent event) {
         MKChat.LOGGER.info("MKChat.processIMC");
         event.getIMCStream().forEach(m -> {
             if (m.getMethod().equals(REGISTER_DIALOGUE_EXTENSION)) {

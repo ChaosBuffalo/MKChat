@@ -32,7 +32,7 @@ public class DialogueDataProvider implements IDataProvider {
         writeDialogue(getTestTree(), cache);
     }
 
-    private DialogueTree getTestTree(){
+    private DialogueTree getTestTree() {
         DialogueTree tree = new DialogueTree(new ResourceLocation(MKChat.MODID, "test"));
         DialogueNode grantLevel = new DialogueNode("grant_level", "Here is 1 level.");
         grantLevel.addEffect(new AddLevelEffect(1));
@@ -41,7 +41,7 @@ public class DialogueDataProvider implements IDataProvider {
 
         tree.addNode(grantLevel);
 
-        DialogueNode alreadyGranted  = new DialogueNode("already_granted",
+        DialogueNode alreadyGranted = new DialogueNode("already_granted",
                 "You already got a level, don't be greedy.");
 
         DialogueNode cantHelp = new DialogueNode("cant_help",
@@ -79,7 +79,7 @@ public class DialogueDataProvider implements IDataProvider {
     }
 
 
-    public void writeDialogue(DialogueTree dialogue, @Nonnull DirectoryCache cache){
+    public void writeDialogue(DialogueTree dialogue, @Nonnull DirectoryCache cache) {
         Path outputFolder = this.generator.getOutputFolder();
         ResourceLocation key = dialogue.getDialogueName();
         Path local = Paths.get("data", key.getNamespace(), DialogueManager.DEFINITION_FOLDER, key.getPath() + ".json");
@@ -87,7 +87,7 @@ public class DialogueDataProvider implements IDataProvider {
         try {
             JsonElement element = dialogue.serialize(JsonOps.INSTANCE);
             IDataProvider.save(GSON, cache, element, path);
-        } catch (IOException e){
+        } catch (IOException e) {
             MKChat.LOGGER.error("Couldn't write dialogue to file {}", path, e);
         }
     }

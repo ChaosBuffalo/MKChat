@@ -1,11 +1,11 @@
 package com.chaosbuffalo.mkchat.entity;
 
 import com.chaosbuffalo.mkchat.MKChat;
-import com.chaosbuffalo.mkchat.capabilities.ChatCapabilities;
 import com.chaosbuffalo.mkchat.capabilities.INpcDialogue;
 import com.chaosbuffalo.mkchat.init.ChatEntityTypes;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.goal.LookAtGoal;
+import net.minecraft.entity.ai.goal.LookRandomlyGoal;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

@@ -10,7 +10,7 @@ public class MKChatGenerator {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
-        if (event.includeServer()){
+        if (event.includeServer()) {
             gen.addProvider(new DialogueDataProvider(gen));
         }
     }

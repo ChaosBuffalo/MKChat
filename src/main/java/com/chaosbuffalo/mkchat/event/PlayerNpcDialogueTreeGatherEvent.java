@@ -23,7 +23,7 @@ public class PlayerNpcDialogueTreeGatherEvent extends PlayerEvent {
         return speaker;
     }
 
-    public void addTree(DialogueTree tree){
+    public void addTree(DialogueTree tree) {
         treeStack.add(tree);
     }
 }

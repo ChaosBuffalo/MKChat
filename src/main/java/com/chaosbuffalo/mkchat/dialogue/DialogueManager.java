@@ -34,7 +34,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(modid=MKChat.MODID, bus=Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = MKChat.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DialogueManager extends JsonReloadListener {
     public static final String DEFINITION_FOLDER = "dialogues";
 

@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 
 public class SerializationUtils {
 
-    public static <T> BiFunction<Gson, JsonObject, T> deserialize(Class<? extends T> tClass){
+    public static <T> BiFunction<Gson, JsonObject, T> deserialize(Class<? extends T> tClass) {
         return (gson, obj) -> gson.fromJson(obj, tClass);
     }
 }

@@ -19,14 +19,14 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
     private final ResourceLocation conditionType;
     private boolean invert;
 
-    public DialogueCondition(ResourceLocation conditionType){
+    public DialogueCondition(ResourceLocation conditionType) {
         this.conditionType = conditionType;
         invert = false;
     }
 
     public abstract boolean meetsCondition(ServerPlayerEntity player, LivingEntity source);
 
-    public boolean checkCondition(ServerPlayerEntity player, LivingEntity source){
+    public boolean checkCondition(ServerPlayerEntity player, LivingEntity source) {
         boolean condition = meetsCondition(player, source);
         MKChat.LOGGER.debug("Player {} meets condition {} {}", player, getTypeName(), invert != condition);
         return invert != condition;

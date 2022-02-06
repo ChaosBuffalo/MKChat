@@ -4,7 +4,6 @@ import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.entity.TestChatReceiverEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -30,7 +29,7 @@ public class ChatEntityTypes {
 
 
     @SubscribeEvent
-    public static void registerEntityAttributes(EntityAttributeCreationEvent event){
+    public static void registerEntityAttributes(EntityAttributeCreationEvent event) {
         event.put(TEST_CHAT.get(), PigEntity.func_234215_eI_().create());
     }
 }

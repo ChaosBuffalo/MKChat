@@ -1,6 +1,5 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
-import com.chaosbuffalo.mkchat.MKChat;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -15,7 +14,7 @@ public class ContextAwareTextComponent extends StringTextComponent {
         this.argsSupplier = argsSupplier;
     }
 
-    public ITextComponent getContextFormattedTextComponent(DialogueContext context){
+    public ITextComponent getContextFormattedTextComponent(DialogueContext context) {
         return new StringTextComponent(String.format(getText(), argsSupplier.apply(context).toArray()));
     }
 }

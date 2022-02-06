@@ -12,7 +12,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @SuppressWarnings("unused")
-@Mod.EventBusSubscriber(modid= MKChat.MODID, bus=Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(modid = MKChat.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CapabilityHandler {
 
     @SuppressWarnings("unused")
@@ -21,7 +21,7 @@ public class CapabilityHandler {
         if (e.getObject() instanceof PlayerEntity) {
             e.addCapability(ChatCapabilities.PLAYER_DIALOGUE_CAP_ID,
                     new PlayerDialogueProvider((PlayerEntity) e.getObject()));
-        } else if (e.getObject() instanceof LivingEntity){
+        } else if (e.getObject() instanceof LivingEntity) {
             e.addCapability(ChatCapabilities.NPC_DIALOGUE_CAP_ID,
                     new NpcDialogueProvider((LivingEntity) e.getObject()));
         }
