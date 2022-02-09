@@ -41,21 +41,21 @@ public class DialogueManager extends JsonReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Map<ResourceLocation, DialogueTree> trees = new HashMap<>();
     private static final Map<String, BiFunction<String, DialogueTree, ITextComponent>> textComponentProviders = new HashMap<>();
-    private static final Map<String, Function<DialogueContext, String>> contextProviders = new HashMap<>();
+    private static final Map<String, Function<DialogueContext, ITextComponent>> contextProviders = new HashMap<String, Function<DialogueContext, ITextComponent>>();
 
     private static final Map<ResourceLocation, Supplier<DialogueEffect>> effectDeserializers = new HashMap<>();
     private static final Map<ResourceLocation, Supplier<DialogueCondition>> conditionDeserializers = new HashMap<>();
 
-    private static final Function<DialogueContext, String> playerNameProvider =
-            (context) -> context.getPlayer().getName().getString();
+    private static final Function<DialogueContext, ITextComponent> playerNameProvider =
+            (context) -> context.getPlayer().getName();
 
-    private static final Function<DialogueContext, String> entityNameProvider =
-            (context) -> context.getSpeaker().getName().getString();
+    private static final Function<DialogueContext, ITextComponent> entityNameProvider =
+            (context) -> context.getSpeaker().getName();
 
     private static final BiFunction<String, DialogueTree, ITextComponent> contextProvider =
             (name, tree) -> {
                 if (contextProviders.containsKey(name)) {
-                    return new ContextAwareTextComponent("%s", (context) ->
+                    return new ContextAwareTextComponent("mkchat.simple_context.msg", (context) ->
                             Lists.newArrayList(contextProviders.get(name).apply(context)));
                 } else {
                     return new StringTextComponent(String.format("{context:%s}", name));
@@ -94,7 +94,7 @@ public class DialogueManager extends JsonReloadListener {
         putContextArgProvider("entity_name", entityNameProvider);
     }
 
-    public static void putContextArgProvider(String typeName, Function<DialogueContext, String> func) {
+    public static void putContextArgProvider(String typeName, Function<DialogueContext, ITextComponent> func) {
         contextProviders.put(typeName, func);
     }
 

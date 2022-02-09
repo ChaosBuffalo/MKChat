@@ -27,8 +27,13 @@ public class DialogueObject {
         return id;
     }
 
-    private String getRawMessage() {
+    public String getRawMessage() {
         return rawMessage;
+    }
+
+    public void setRawMessage(String newRaw){
+        rawMessage = newRaw;
+        buildMessageSupplier();
     }
 
     public void setDialogueTree(DialogueTree dialogueTree) {
