@@ -48,7 +48,14 @@ public class DialogueObject {
     }
 
     private void buildMessageSupplier() {
-        compiledMessage = Lazy.of(() -> DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree()));
+        compiledMessage = Lazy.of(() -> {
+            if (getDialogueTree() == null) {
+                throw new DialogueElementMissingException(
+                        "Dialogue object '%s' was attempted to be compiled without a tree! Raw Message '%s'",
+                        getId(), getRawMessage());
+            }
+            return DialogueManager.parseDialogueMessage(getRawMessage(), getDialogueTree());
+        });
     }
 
     protected static <D> Optional<String> decodeKey(Dynamic<D> dynamic) {

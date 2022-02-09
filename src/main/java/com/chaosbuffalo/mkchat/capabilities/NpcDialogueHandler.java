@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -89,7 +90,9 @@ public class NpcDialogueHandler implements INpcDialogue {
 
 
     public static final String NO_THANKS = "Talk to me about something else.";
-    public static final DialoguePrompt ADDITIONAL_DIALOGUE = new DialoguePrompt("nextTree", NO_THANKS, NO_THANKS, "More");
+    private static final DialogueTree moveNextTree = new DialogueTree(new ResourceLocation(MKChat.MODID, "move_next_tree"));
+    public static final DialoguePrompt ADDITIONAL_DIALOGUE =
+            Util.make(new DialoguePrompt("nextTree", NO_THANKS, NO_THANKS, "More"), p -> p.setDialogueTree(moveNextTree));
 
     private final LivingEntity entity;
     private final Map<UUID, Conversation> conversations;
