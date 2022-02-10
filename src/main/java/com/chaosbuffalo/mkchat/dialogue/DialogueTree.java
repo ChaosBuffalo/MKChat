@@ -6,6 +6,8 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -44,6 +46,13 @@ public class DialogueTree {
         return prompts.get(name);
     }
 
+    public DialogueTree copy(){
+        DialogueTree newTree = new DialogueTree(dialogueName);
+        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
+        newTree.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        return newTree;
+    }
+
     public void addPrompt(DialoguePrompt prompt) {
         prompt.setDialogueTree(this);
         prompt.getRequiredNodes().forEach(nodeId -> {
@@ -53,6 +62,14 @@ public class DialogueTree {
             }
         });
         prompts.put(prompt.getId(), prompt);
+    }
+
+    public Map<String, DialogueNode> getNodes() {
+        return nodes;
+    }
+
+    public Map<String, DialoguePrompt> getPrompts() {
+        return prompts;
     }
 
     @Nullable
@@ -117,5 +134,27 @@ public class DialogueTree {
                         throw new DialogueElementMissingException("Hail prompt '%s' not found in tree '%s'", s, getDialogueName());
                     }
                 });
+    }
+
+    public void mergeTree(DialogueTree other){
+        boolean shouldMergeHailPrompt = true;
+        if (getHailPrompt() != null){
+            if (other.getHailPrompt() != null){
+                getHailPrompt().merge(other.getHailPrompt().copy());
+                shouldMergeHailPrompt = false;
+            }
+        } else {
+            if (other.getHailPrompt() != null){
+                setHailPrompt(other.getHailPrompt().copy());
+            }
+        }
+        for (DialogueNode node : other.getNodes().values()){
+            addNode(node.copy());
+        }
+        for (DialoguePrompt prompt : other.getPrompts().values()){
+            if (!prompt.equals(other.getHailPrompt()) || shouldMergeHailPrompt){
+                addPrompt(prompt.copy());
+            }
+        }
     }
 }
