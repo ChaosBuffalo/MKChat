@@ -25,6 +25,11 @@ public class HasBoolFlagCondition extends DialogueCondition {
     }
 
     @Override
+    public HasBoolFlagCondition copy() {
+        return new HasBoolFlagCondition(flagName);
+    }
+
+    @Override
     public boolean meetsCondition(ServerPlayerEntity player, LivingEntity source) {
         if (flagName.equals(AddFlag.INVALID_FLAG)) {
             return false;

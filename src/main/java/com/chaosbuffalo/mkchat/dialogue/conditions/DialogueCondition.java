@@ -2,6 +2,7 @@ package com.chaosbuffalo.mkchat.dialogue.conditions;
 
 import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
+import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import com.chaosbuffalo.mkcore.serialization.IDynamicMapTypedSerializer;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
@@ -9,6 +10,8 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -36,6 +39,8 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
         this.invert = invert;
         return this;
     }
+
+    public abstract DialogueCondition copy();
 
     @Override
     public ResourceLocation getTypeName() {
