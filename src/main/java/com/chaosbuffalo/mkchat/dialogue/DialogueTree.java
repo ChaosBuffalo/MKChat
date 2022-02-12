@@ -136,7 +136,7 @@ public class DialogueTree {
                 });
     }
 
-    public void mergeTree(DialogueTree other){
+    protected void internalMerge(DialogueTree other){
         boolean shouldMergeHailPrompt = true;
         if (getHailPrompt() != null){
             if (other.getHailPrompt() != null){
@@ -156,5 +156,11 @@ public class DialogueTree {
                 addPrompt(prompt.copy());
             }
         }
+    }
+
+    public DialogueTree merge(DialogueTree other){
+        DialogueTree newTree = copy();
+        newTree.internalMerge(other);
+        return newTree;
     }
 }
