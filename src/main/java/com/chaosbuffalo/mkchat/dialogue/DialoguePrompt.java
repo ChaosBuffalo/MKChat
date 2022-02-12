@@ -56,6 +56,12 @@ public class DialoguePrompt extends DialogueObject {
         return newPrompt;
     }
 
+    public void merge(DialoguePrompt other){
+        for (DialogueResponse resp : other.getResponses()){
+            addResponse(resp);
+        }
+    }
+
     public String getTriggerPhrase() {
         return triggerPhrase;
     }
