@@ -26,6 +26,12 @@ public class AddFlag extends DialogueEffect {
     }
 
     @Override
+    public AddFlag copy() {
+        // No runtime mutable state
+        return new AddFlag(flagName);
+    }
+
+    @Override
     public void applyEffect(ServerPlayerEntity player, LivingEntity source, DialogueNode node) {
         if (flagName.equals(INVALID_FLAG)) {
             return;

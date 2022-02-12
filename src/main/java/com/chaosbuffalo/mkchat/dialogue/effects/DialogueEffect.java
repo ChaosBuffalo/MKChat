@@ -20,6 +20,8 @@ public abstract class DialogueEffect implements IDynamicMapTypedSerializer {
         this.effectType = effectType;
     }
 
+    public abstract DialogueEffect copy();
+
     public abstract void applyEffect(ServerPlayerEntity player, LivingEntity source, DialogueNode node);
 
     @Override

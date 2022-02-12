@@ -23,6 +23,12 @@ public class AddLevelEffect extends DialogueEffect {
     }
 
     @Override
+    public AddLevelEffect copy() {
+        // No runtime mutable state
+        return new AddLevelEffect(levelAmount);
+    }
+
+    @Override
     public void applyEffect(ServerPlayerEntity player, LivingEntity source, DialogueNode node) {
         player.addExperienceLevel(levelAmount);
     }
