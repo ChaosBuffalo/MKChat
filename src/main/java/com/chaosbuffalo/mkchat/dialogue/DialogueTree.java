@@ -18,13 +18,13 @@ public class DialogueTree {
     private final ResourceLocation dialogueName;
     private final Map<String, DialogueNode> nodes;
     private final Map<String, DialoguePrompt> prompts;
-    private DialoguePrompt hailPrompt;
+    private String hailPromptId;
 
     public DialogueTree(ResourceLocation dialogueName) {
         this.dialogueName = dialogueName;
         this.nodes = new HashMap<>();
         this.prompts = new HashMap<>();
-        hailPrompt = null;
+        hailPromptId = null;
     }
 
     public void addNode(DialogueNode node) {
@@ -46,7 +46,7 @@ public class DialogueTree {
         return prompts.get(name);
     }
 
-    public DialogueTree copy(){
+    public DialogueTree copy() {
         DialogueTree newTree = new DialogueTree(dialogueName);
         INBT nbt = serialize(NBTDynamicOps.INSTANCE);
         newTree.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
@@ -74,11 +74,30 @@ public class DialogueTree {
 
     @Nullable
     public DialoguePrompt getHailPrompt() {
-        return hailPrompt;
+        if (hailPromptId == null)
+            return null;
+        return getPrompt(hailPromptId);
+    }
+
+    public void setHailPromptId(String hailPromptId) {
+        if (hailPromptId == null) {
+            this.hailPromptId = null;
+            return;
+        }
+        DialoguePrompt prompt = getPrompt(hailPromptId);
+        if (prompt != null) {
+            this.hailPromptId = hailPromptId;
+        } else {
+            throw new DialogueElementMissingException("Hail prompt '%s' not found in tree '%s'", hailPromptId, getDialogueName());
+        }
     }
 
     public void setHailPrompt(DialoguePrompt hailPrompt) {
-        this.hailPrompt = hailPrompt;
+        if (hailPrompt == null) {
+            this.hailPromptId = null;
+        } else {
+            setHailPromptId(hailPrompt.getId());
+        }
     }
 
     public boolean handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker) {
@@ -126,39 +145,29 @@ public class DialogueTree {
 
         dynamic.get("hailPrompt").asString()
                 .resultOrPartial(DialogueUtils::throwParseException)
-                .ifPresent(s -> {
-                    DialoguePrompt prompt = getPrompt(s);
-                    if (prompt != null) {
-                        setHailPrompt(prompt);
-                    } else {
-                        throw new DialogueElementMissingException("Hail prompt '%s' not found in tree '%s'", s, getDialogueName());
-                    }
-                });
+                .ifPresent(this::setHailPromptId);
     }
 
-    protected void internalMerge(DialogueTree other){
-        boolean shouldMergeHailPrompt = true;
-        if (getHailPrompt() != null){
-            if (other.getHailPrompt() != null){
-                getHailPrompt().merge(other.getHailPrompt().copy());
-                shouldMergeHailPrompt = false;
-            }
-        } else {
-            if (other.getHailPrompt() != null){
-                setHailPrompt(other.getHailPrompt().copy());
-            }
-        }
-        for (DialogueNode node : other.getNodes().values()){
+    protected void internalMerge(DialogueTree other) {
+        for (DialogueNode node : other.getNodes().values()) {
             addNode(node.copy());
         }
-        for (DialoguePrompt prompt : other.getPrompts().values()){
-            if (!prompt.equals(other.getHailPrompt()) || shouldMergeHailPrompt){
+
+        for (DialoguePrompt prompt : other.getPrompts().values()) {
+            DialoguePrompt existing = getPrompt(prompt.getId());
+            if (existing == null) {
                 addPrompt(prompt.copy());
+            } else {
+                existing.merge(prompt);
             }
+        }
+
+        if (hailPromptId == null && other.hailPromptId != null) {
+            setHailPromptId(other.hailPromptId);
         }
     }
 
-    public DialogueTree merge(DialogueTree other){
+    public DialogueTree merge(DialogueTree other) {
         DialogueTree newTree = copy();
         newTree.internalMerge(other);
         return newTree;
