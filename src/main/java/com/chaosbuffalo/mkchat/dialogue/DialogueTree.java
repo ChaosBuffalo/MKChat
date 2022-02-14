@@ -143,8 +143,9 @@ public class DialogueTree {
         dynamic.get("prompts").asList(DialoguePrompt::fromDynamic)
                 .forEach(dr -> dr.resultOrPartial(DialogueUtils::throwParseException).ifPresent(this::addPrompt));
 
+        // Optional
         dynamic.get("hailPrompt").asString()
-                .resultOrPartial(DialogueUtils::throwParseException)
+                .result()
                 .ifPresent(this::setHailPromptId);
     }
 
