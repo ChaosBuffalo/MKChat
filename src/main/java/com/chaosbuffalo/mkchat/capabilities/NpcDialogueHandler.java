@@ -7,16 +7,16 @@ import com.chaosbuffalo.mkchat.dialogue.DialoguePrompt;
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
 import com.chaosbuffalo.mkchat.event.PlayerNpcDialogueTreeGatherEvent;
 import com.chaosbuffalo.mkcore.GameConstants;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.play.server.SChatPacket;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.Util;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -32,10 +32,10 @@ public class NpcDialogueHandler implements INpcDialogue {
         public int lastTickSeen;
         public List<DialogueTree> relevantTrees;
 
-        public Conversation(ServerPlayerEntity player, LivingEntity speaker, List<DialogueTree> speakerTrees) {
+        public Conversation(ServerPlayer player, LivingEntity speaker, List<DialogueTree> speakerTrees) {
             this.trees = speakerTrees;
             this.currentIndex = 0;
-            this.lastTickSeen = speaker.ticksExisted;
+            this.lastTickSeen = speaker.tickCount;
             updateRelevantTrees(player, speaker);
         }
 
@@ -50,7 +50,7 @@ public class NpcDialogueHandler implements INpcDialogue {
             }
         }
 
-        private void updateRelevantTrees(ServerPlayerEntity player, LivingEntity speaker) {
+        private void updateRelevantTrees(ServerPlayer player, LivingEntity speaker) {
             relevantTrees = trees.stream().filter(tree -> {
                 MKChat.LOGGER.debug("Checking Dialogue Tree {} relevance for player {}", tree.getDialogueName(), player);
                 DialoguePrompt hailPrompt = tree.getHailPrompt();
@@ -63,7 +63,7 @@ public class NpcDialogueHandler implements INpcDialogue {
             }
         }
 
-        public void handlePlayerMessage(ServerPlayerEntity player, LivingEntity speaker, String message) {
+        public void handlePlayerMessage(ServerPlayer player, LivingEntity speaker, String message) {
             for (int i = relevantTrees.size() - 1; i >= 0; i--) {
                 DialogueTree tree = relevantTrees.get(i);
                 if (tree.handlePlayerMessage(player, message, speaker)) {
@@ -73,7 +73,7 @@ public class NpcDialogueHandler implements INpcDialogue {
             }
         }
 
-        public void converse(ServerPlayerEntity player, LivingEntity speaker) {
+        public void converse(ServerPlayer player, LivingEntity speaker) {
             for (int i = relevantTrees.size() - 1 - currentIndex; i >= 0; i--) {
                 DialogueTree tree = relevantTrees.get(i);
                 DialoguePrompt hail = tree.getHailPrompt();
@@ -116,7 +116,7 @@ public class NpcDialogueHandler implements INpcDialogue {
     }
 
     @Nullable
-    public Conversation createConversation(ServerPlayerEntity player) {
+    public Conversation createConversation(ServerPlayer player) {
         List<DialogueTree> trees = new ArrayList<>();
         DialogueTree primaryTree = DialogueManager.getDialogueTree(primaryDialogueTreeName);
         if (primaryTree != null) {
@@ -126,16 +126,16 @@ public class NpcDialogueHandler implements INpcDialogue {
         MinecraftForge.EVENT_BUS.post(new PlayerNpcDialogueTreeGatherEvent(player, getEntity(), trees));
         if (!trees.isEmpty()) {
             Conversation entry = new Conversation(player, entity, trees);
-            conversations.put(player.getUniqueID(), entry);
+            conversations.put(player.getUUID(), entry);
             return entry;
         }
         return null;
     }
 
     @Nullable
-    public Conversation getConversation(ServerPlayerEntity player) {
-        Conversation entry = conversations.get(player.getUniqueID());
-        if (entry == null || entry.isExpired(entity.ticksExisted)) {
+    public Conversation getConversation(ServerPlayer player) {
+        Conversation entry = conversations.get(player.getUUID());
+        if (entry == null || entry.isExpired(entity.tickCount)) {
             entry = createConversation(player);
         }
         return entry;
@@ -143,7 +143,7 @@ public class NpcDialogueHandler implements INpcDialogue {
 
 
     @Override
-    public void receiveMessage(ServerPlayerEntity player, String message) {
+    public void receiveMessage(ServerPlayer player, String message) {
         Conversation entry = getConversation(player);
         if (entry == null || !hasDialogue())
             return;
@@ -156,7 +156,7 @@ public class NpcDialogueHandler implements INpcDialogue {
         }
     }
 
-    public void startDialogue(ServerPlayerEntity player) {
+    public void startDialogue(ServerPlayer player) {
         Conversation entry = createConversation(player);
         if (entry == null || !hasDialogue())
             return;
@@ -168,24 +168,24 @@ public class NpcDialogueHandler implements INpcDialogue {
     // Use single-argument version
     @Deprecated
     @Override
-    public void startDialogue(ServerPlayerEntity player, boolean suppressHail) {
+    public void startDialogue(ServerPlayer player, boolean suppressHail) {
         startDialogue(player);
     }
 
-    private void sendHailMessage(ServerPlayerEntity player) {
+    private void sendHailMessage(ServerPlayer player) {
         MinecraftServer server = player.getServer();
         if (server == null)
             return;
 
-        ITextComponent hail = new StringTextComponent("<")
-                .appendSibling(player.getDisplayName())
-                .appendString("> Hail, ")
-                .appendSibling(getEntity().getDisplayName());
+        Component hail = new TextComponent("<")
+                .append(player.getDisplayName())
+                .append("> Hail, ")
+                .append(getEntity().getDisplayName());
 
-        server.getPlayerList().sendToAllNearExcept(null,
-                player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
-                player.getServerWorld().getDimensionKey(),
-                new SChatPacket(hail, ChatType.CHAT, player.getUniqueID()));
+        server.getPlayerList().broadcast(null,
+                player.getX(), player.getY(), player.getZ(), ChatConstants.CHAT_RADIUS,
+                player.getLevel().dimension(),
+                new ClientboundChatPacket(hail, ChatType.CHAT, player.getUUID()));
     }
 
     @Override
@@ -206,12 +206,12 @@ public class NpcDialogueHandler implements INpcDialogue {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        return new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        return new CompoundTag();
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
     }
 }

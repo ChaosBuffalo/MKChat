@@ -6,15 +6,15 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.OptionalDynamic;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.util.StringUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -51,8 +51,8 @@ public class DialoguePrompt extends DialogueObject {
 
     public DialoguePrompt copy() {
         DialoguePrompt newPrompt = new DialoguePrompt(getId());
-        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
-        newPrompt.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        Tag nbt = serialize(NbtOps.INSTANCE);
+        newPrompt.deserialize(new Dynamic<>(NbtOps.INSTANCE, nbt));
         return newPrompt;
     }
 
@@ -70,15 +70,15 @@ public class DialoguePrompt extends DialogueObject {
         return suggestionFillText;
     }
 
-    public ITextComponent getHighlightedText() {
+    public Component getHighlightedText() {
         return getMessage();
     }
 
     public boolean willTriggerFrom(String input) {
-        return !StringUtils.isNullOrEmpty(triggerPhrase) && input.contains(triggerPhrase);
+        return !StringUtil.isNullOrEmpty(triggerPhrase) && input.contains(triggerPhrase);
     }
 
-    public boolean willHandle(ServerPlayerEntity player, LivingEntity source) {
+    public boolean willHandle(ServerPlayer player, LivingEntity source) {
         for (DialogueResponse response : responses) {
             if (response.doesMatchConditions(player, source)) {
                 return true;
@@ -88,7 +88,7 @@ public class DialoguePrompt extends DialogueObject {
         return false;
     }
 
-    public boolean handlePrompt(ServerPlayerEntity player, LivingEntity source, DialogueTree tree,
+    public boolean handlePrompt(ServerPlayer player, LivingEntity source, DialogueTree tree,
                                 @Nullable DialoguePrompt withAdditional) {
         for (DialogueResponse response : responses) {
             if (response.doesMatchConditions(player, source)) {
@@ -113,12 +113,12 @@ public class DialoguePrompt extends DialogueObject {
         return String.format("{prompt:%s}", getId());
     }
 
-    public ITextComponent getPromptLink() {
-        return new StringTextComponent("[")
-                .appendSibling(getHighlightedText())
-                .appendString("]")
-                .mergeStyle(TextFormatting.AQUA)
-                .modifyStyle(s -> s.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getSuggestion())));
+    public Component getPromptLink() {
+        return new TextComponent("[")
+                .append(getHighlightedText())
+                .append("]")
+                .withStyle(ChatFormatting.AQUA)
+                .withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getSuggestion())));
     }
 
     public Stream<String> getRequiredNodes() {

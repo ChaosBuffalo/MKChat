@@ -1,14 +1,14 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PlayerConversationMemory implements INBTSerializable<CompoundNBT> {
+public class PlayerConversationMemory implements INBTSerializable<CompoundTag> {
     private UUID uuid;
     private final Map<ResourceLocation, Boolean> boolFlags;
 
@@ -30,10 +30,10 @@ public class PlayerConversationMemory implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tag = new CompoundNBT();
-        tag.putUniqueId("npcId", uuid);
-        CompoundNBT boolFlagsTag = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putUUID("npcId", uuid);
+        CompoundTag boolFlagsTag = new CompoundTag();
         for (Map.Entry<ResourceLocation, Boolean> entry : boolFlags.entrySet()) {
             boolFlagsTag.putBoolean(entry.getKey().toString(), entry.getValue());
         }
@@ -42,11 +42,11 @@ public class PlayerConversationMemory implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        uuid = nbt.getUniqueId("npcId");
+    public void deserializeNBT(CompoundTag nbt) {
+        uuid = nbt.getUUID("npcId");
         boolFlags.clear();
-        CompoundNBT boolFlagsTag = nbt.getCompound("boolFlags");
-        for (String key : boolFlagsTag.keySet()) {
+        CompoundTag boolFlagsTag = nbt.getCompound("boolFlags");
+        for (String key : boolFlagsTag.getAllKeys()) {
             boolean value = boolFlagsTag.getBoolean(key);
             boolFlags.put(new ResourceLocation(key), value);
         }

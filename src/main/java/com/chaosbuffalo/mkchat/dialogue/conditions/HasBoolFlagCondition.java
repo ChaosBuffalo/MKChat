@@ -7,9 +7,9 @@ import com.chaosbuffalo.mkchat.dialogue.effects.AddFlag;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 
 public class HasBoolFlagCondition extends DialogueCondition {
     public static final ResourceLocation conditionTypeName = new ResourceLocation(MKChat.MODID, "dialogue_condition.has_bool_flag");
@@ -30,7 +30,7 @@ public class HasBoolFlagCondition extends DialogueCondition {
     }
 
     @Override
-    public boolean meetsCondition(ServerPlayerEntity player, LivingEntity source) {
+    public boolean meetsCondition(ServerPlayer player, LivingEntity source) {
         if (flagName.equals(AddFlag.INVALID_FLAG)) {
             return false;
         }

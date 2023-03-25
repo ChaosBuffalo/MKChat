@@ -1,16 +1,16 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 
-public class PlayerDialogueProvider extends ChatCapabilities.Provider<PlayerEntity, IPlayerDialogue> {
+public class PlayerDialogueProvider extends ChatCapabilities.Provider<Player, IPlayerDialogue> {
 
-    public PlayerDialogueProvider(PlayerEntity player) {
+    public PlayerDialogueProvider(Player player) {
         super(player);
     }
 
     @Override
-    PlayerDialogueHandler makeData(PlayerEntity attached) {
+    PlayerDialogueHandler makeData(Player attached) {
         return new PlayerDialogueHandler(attached);
     }
 

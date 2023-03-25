@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -48,8 +48,8 @@ public class DialogueTree {
 
     public DialogueTree copy() {
         DialogueTree newTree = new DialogueTree(dialogueName);
-        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
-        newTree.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        Tag nbt = serialize(NbtOps.INSTANCE);
+        newTree.deserialize(new Dynamic<>(NbtOps.INSTANCE, nbt));
         return newTree;
     }
 
@@ -100,7 +100,7 @@ public class DialogueTree {
         }
     }
 
-    public boolean handlePlayerMessage(ServerPlayerEntity player, String message, LivingEntity speaker) {
+    public boolean handlePlayerMessage(ServerPlayer player, String message, LivingEntity speaker) {
         for (DialoguePrompt prompt : prompts.values()) {
             if (prompt.willTriggerFrom(message)) {
                 if (prompt.handlePrompt(player, speaker, this, null)) {

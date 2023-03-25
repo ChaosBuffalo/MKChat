@@ -1,24 +1,24 @@
 package com.chaosbuffalo.mkchat.dialogue;
 
 import com.chaosbuffalo.mkchat.MKChat;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.SChatPacket;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.Util;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
 
 public class DialogueUtils {
     private static final double CHAT_RADIUS = 5.0;
 
     public static void sendMessageToAllAround(MinecraftServer server, LivingEntity source,
-                                              ITextComponent message) {
-        server.getPlayerList().sendToAllNearExcept(null,
-                source.getPosX(), source.getPosY(), source.getPosZ(), CHAT_RADIUS,
-                source.getEntityWorld().getDimensionKey(),
-                new SChatPacket(message, ChatType.CHAT, Util.DUMMY_UUID));
+                                              Component message) {
+        server.getPlayerList().broadcast(null,
+                source.getX(), source.getY(), source.getZ(), CHAT_RADIUS,
+                source.getCommandSenderWorld().dimension(),
+                new ClientboundChatPacket(message, ChatType.CHAT, Util.NIL_UUID));
 
     }
 

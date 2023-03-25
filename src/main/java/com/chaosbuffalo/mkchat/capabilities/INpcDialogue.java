@@ -1,29 +1,29 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
 import com.chaosbuffalo.mkchat.dialogue.DialogueTree;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nullable;
 
-public interface INpcDialogue extends INBTSerializable<CompoundNBT> {
+public interface INpcDialogue extends INBTSerializable<CompoundTag> {
 
     boolean hasDialogue();
 
     void addAdditionalDialogueTree(DialogueTree tree);
 
-    void receiveMessage(ServerPlayerEntity player, String message);
+    void receiveMessage(ServerPlayer player, String message);
 
-    void startDialogue(ServerPlayerEntity player);
+    void startDialogue(ServerPlayer player);
 
     @Deprecated
-    void startDialogue(ServerPlayerEntity player, boolean suppressHail);
+    void startDialogue(ServerPlayer player, boolean suppressHail);
 
-    default void hail(ServerPlayerEntity player) {
+    default void hail(ServerPlayer player) {
         startDialogue(player);
     }
 

@@ -5,9 +5,9 @@ import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import com.chaosbuffalo.mkcore.serialization.IDynamicMapTypedSerializer;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -22,7 +22,7 @@ public abstract class DialogueEffect implements IDynamicMapTypedSerializer {
 
     public abstract DialogueEffect copy();
 
-    public abstract void applyEffect(ServerPlayerEntity player, LivingEntity source, DialogueNode node);
+    public abstract void applyEffect(ServerPlayer player, LivingEntity source, DialogueNode node);
 
     @Override
     public String getTypeEntryName() {

@@ -3,12 +3,13 @@ package com.chaosbuffalo.mkchat.event;
 import com.chaosbuffalo.mkchat.ChatConstants;
 import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.capabilities.INpcDialogue;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SChatPacket;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ChatType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.protocol.game.ClientboundChatPacket;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ChatType;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,24 +20,24 @@ import java.util.List;
 public class ChatHandler {
 
 
-    private static AxisAlignedBB getChatBoundingBox(ServerPlayerEntity entity, double radius) {
-        return new AxisAlignedBB(new BlockPos(entity.getPosition())).grow(radius, entity.getHeight(), radius);
+    private static AABB getChatBoundingBox(ServerPlayer entity, double radius) {
+        return new AABB(new BlockPos(entity.blockPosition())).inflate(radius, entity.getBbHeight(), radius);
     }
 
     @SubscribeEvent
     public static void handleServerChat(ServerChatEvent event) {
-        ServerPlayerEntity player = event.getPlayer();
+        ServerPlayer player = event.getPlayer();
         if (player.getServer() != null) {
-            player.getServer().getPlayerList().sendToAllNearExcept(null,
-                    player.getPosX(), player.getPosY(), player.getPosZ(), ChatConstants.CHAT_RADIUS,
-                    player.getServerWorld().getDimensionKey(),
-                    new SChatPacket(event.getComponent(), ChatType.CHAT, player.getUniqueID()));
+            player.getServer().getPlayerList().broadcast(null,
+                    player.getX(), player.getY(), player.getZ(), ChatConstants.CHAT_RADIUS,
+                    player.getLevel().dimension(),
+                    new ClientboundChatPacket(event.getComponent(), ChatType.CHAT, player.getUUID()));
 
-            List<LivingEntity> entities = player.getServerWorld().getEntitiesWithinAABB(LivingEntity.class,
+            List<Mob> entities = player.getLevel().getEntitiesOfClass(Mob.class,
                     getChatBoundingBox(player, ChatConstants.NPC_CHAT_RADIUS),
-                    x -> x.canEntityBeSeen(player) && INpcDialogue.get(x).map(INpcDialogue::hasDialogue).orElse(false));
+                    x -> x.getSensing().hasLineOfSight(player) && INpcDialogue.get(x).map(INpcDialogue::hasDialogue).orElse(false));
 
-            for (LivingEntity entity : entities) {
+            for (Mob entity : entities) {
                 INpcDialogue.get(entity).ifPresent(cap -> cap.receiveMessage(player, event.getMessage()));
             }
         }

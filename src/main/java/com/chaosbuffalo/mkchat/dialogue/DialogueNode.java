@@ -6,13 +6,13 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.OptionalDynamic;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +32,8 @@ public class DialogueNode extends DialogueObject {
 
     public DialogueNode copy() {
         DialogueNode newNode = new DialogueNode(getId());
-        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
-        newNode.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        Tag nbt = serialize(NbtOps.INSTANCE);
+        newNode.deserialize(new Dynamic<>(NbtOps.INSTANCE, nbt));
         return newNode;
     }
 
@@ -45,37 +45,37 @@ public class DialogueNode extends DialogueObject {
         this.effects.add(effect);
     }
 
-    public IFormattableTextComponent getSpeakerMessage(LivingEntity speaker, ServerPlayerEntity player) {
+    public MutableComponent getSpeakerMessage(LivingEntity speaker, ServerPlayer player) {
         // Generate a string that looks like: "<speaker_name> {message}"
-        IFormattableTextComponent msg = new StringTextComponent("<")
-                .appendSibling(speaker.getDisplayName())
-                .appendString("> ");
+        MutableComponent msg = new TextComponent("<")
+                .append(speaker.getDisplayName())
+                .append("> ");
 
         DialogueContext context = new DialogueContext(speaker, player, this);
         getMessage().getSiblings().stream().map(comp -> {
             if (comp instanceof ContextAwareTextComponent) {
                 return ((ContextAwareTextComponent) comp).getContextFormattedTextComponent(context);
             } else {
-                return comp.deepCopy();
+                return comp.copy();
             }
-        }).forEach(msg::appendSibling);
+        }).forEach(msg::append);
         return msg;
     }
 
-    public void sendMessage(ServerPlayerEntity player, LivingEntity source) {
+    public void sendMessage(ServerPlayer player, LivingEntity source) {
         sendMessage(player, source, getSpeakerMessage(source, player));
     }
 
-    public void sendMessageWithSibling(ServerPlayerEntity player, LivingEntity source,
+    public void sendMessageWithSibling(ServerPlayer player, LivingEntity source,
                                        DialoguePrompt withAdditional) {
-        IFormattableTextComponent message = getSpeakerMessage(source, player)
-                .appendString(" ")
-                .appendSibling(withAdditional.getPromptLink());
+        MutableComponent message = getSpeakerMessage(source, player)
+                .append(" ")
+                .append(withAdditional.getPromptLink());
 
         sendMessage(player, source, message);
     }
 
-    private void sendMessage(ServerPlayerEntity player, LivingEntity source, ITextComponent message) {
+    private void sendMessage(ServerPlayer player, LivingEntity source, Component message) {
         if (player.getServer() != null) {
             DialogueUtils.sendMessageToAllAround(player.getServer(), source, message);
             for (DialogueEffect effect : effects) {

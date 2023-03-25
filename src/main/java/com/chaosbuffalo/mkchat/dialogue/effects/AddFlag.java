@@ -7,9 +7,9 @@ import com.chaosbuffalo.mkchat.dialogue.DialogueUtils;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 
 public class AddFlag extends DialogueEffect {
     public static ResourceLocation effectTypeName = new ResourceLocation(MKChat.MODID, "dialogue_effect.add_flag");
@@ -32,7 +32,7 @@ public class AddFlag extends DialogueEffect {
     }
 
     @Override
-    public void applyEffect(ServerPlayerEntity player, LivingEntity source, DialogueNode node) {
+    public void applyEffect(ServerPlayer player, LivingEntity source, DialogueNode node) {
         if (flagName.equals(INVALID_FLAG)) {
             return;
         }

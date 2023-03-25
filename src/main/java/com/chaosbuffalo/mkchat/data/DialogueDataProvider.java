@@ -10,16 +10,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DirectoryCache;
-import net.minecraft.data.IDataProvider;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.HashCache;
+import net.minecraft.data.DataProvider;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class DialogueDataProvider implements IDataProvider {
+public class DialogueDataProvider implements DataProvider {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private final DataGenerator generator;
 
@@ -28,7 +28,7 @@ public class DialogueDataProvider implements IDataProvider {
     }
 
     @Override
-    public void act(@Nonnull DirectoryCache cache) {
+    public void run(@Nonnull HashCache cache) {
         writeDialogue(getTestTree(), cache);
     }
 
@@ -79,14 +79,14 @@ public class DialogueDataProvider implements IDataProvider {
     }
 
 
-    public void writeDialogue(DialogueTree dialogue, @Nonnull DirectoryCache cache) {
+    public void writeDialogue(DialogueTree dialogue, @Nonnull HashCache cache) {
         Path outputFolder = this.generator.getOutputFolder();
         ResourceLocation key = dialogue.getDialogueName();
         Path local = Paths.get("data", key.getNamespace(), DialogueManager.DEFINITION_FOLDER, key.getPath() + ".json");
         Path path = outputFolder.resolve(local);
         try {
             JsonElement element = dialogue.serialize(JsonOps.INSTANCE);
-            IDataProvider.save(GSON, cache, element, path);
+            DataProvider.save(GSON, cache, element, path);
         } catch (IOException e) {
             MKChat.LOGGER.error("Couldn't write dialogue to file {}", path, e);
         }

@@ -2,17 +2,14 @@ package com.chaosbuffalo.mkchat.dialogue.conditions;
 
 import com.chaosbuffalo.mkchat.MKChat;
 import com.chaosbuffalo.mkchat.dialogue.DialogueManager;
-import com.chaosbuffalo.mkchat.dialogue.DialogueNode;
 import com.chaosbuffalo.mkcore.serialization.IDynamicMapTypedSerializer;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -27,9 +24,9 @@ public abstract class DialogueCondition implements IDynamicMapTypedSerializer {
         invert = false;
     }
 
-    public abstract boolean meetsCondition(ServerPlayerEntity player, LivingEntity source);
+    public abstract boolean meetsCondition(ServerPlayer player, LivingEntity source);
 
-    public boolean checkCondition(ServerPlayerEntity player, LivingEntity source) {
+    public boolean checkCondition(ServerPlayer player, LivingEntity source) {
         boolean condition = meetsCondition(player, source);
         MKChat.LOGGER.debug("Player {} meets condition {} {}", player, getTypeName(), invert != condition);
         return invert != condition;

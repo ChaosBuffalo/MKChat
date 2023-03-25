@@ -3,7 +3,7 @@ package com.chaosbuffalo.mkchat.dialogue;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.util.Lazy;
 
 import java.util.Optional;
@@ -15,7 +15,7 @@ public class DialogueObject {
     private String id;
     private String rawMessage;
     private DialogueTree dialogueTree;
-    private Supplier<ITextComponent> compiledMessage;
+    private Supplier<Component> compiledMessage;
 
     public DialogueObject(String id, String rawMessage) {
         this.id = id;
@@ -44,7 +44,7 @@ public class DialogueObject {
         return dialogueTree;
     }
 
-    public ITextComponent getMessage() {
+    public Component getMessage() {
         return compiledMessage.get();
     }
 

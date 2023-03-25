@@ -12,15 +12,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.client.resources.JsonReloadListener;
-import net.minecraft.item.Item;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.world.item.Item;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -35,51 +35,51 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = MKChat.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class DialogueManager extends JsonReloadListener {
+public class DialogueManager extends SimpleJsonResourceReloadListener {
     public static final String DEFINITION_FOLDER = "dialogues";
 
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Map<ResourceLocation, DialogueTree> trees = new HashMap<>();
-    private static final Map<String, BiFunction<String, DialogueTree, ITextComponent>> textComponentProviders = new HashMap<>();
-    private static final Map<String, Function<DialogueContext, ITextComponent>> contextProviders = new HashMap<String, Function<DialogueContext, ITextComponent>>();
+    private static final Map<String, BiFunction<String, DialogueTree, Component>> textComponentProviders = new HashMap<>();
+    private static final Map<String, Function<DialogueContext, Component>> contextProviders = new HashMap<String, Function<DialogueContext, Component>>();
 
     private static final Map<ResourceLocation, Supplier<DialogueEffect>> effectDeserializers = new HashMap<>();
     private static final Map<ResourceLocation, Supplier<DialogueCondition>> conditionDeserializers = new HashMap<>();
 
-    private static final Function<DialogueContext, ITextComponent> playerNameProvider =
+    private static final Function<DialogueContext, Component> playerNameProvider =
             (context) -> context.getPlayer().getName();
 
-    private static final Function<DialogueContext, ITextComponent> entityNameProvider =
+    private static final Function<DialogueContext, Component> entityNameProvider =
             (context) -> context.getSpeaker().getName();
 
-    private static final BiFunction<String, DialogueTree, ITextComponent> contextProvider =
+    private static final BiFunction<String, DialogueTree, Component> contextProvider =
             (name, tree) -> {
                 if (contextProviders.containsKey(name)) {
                     return new ContextAwareTextComponent("mkchat.simple_context.msg", (context) ->
                             Lists.newArrayList(contextProviders.get(name).apply(context)));
                 } else {
-                    return new StringTextComponent(String.format("{context:%s}", name));
+                    return new TextComponent(String.format("{context:%s}", name));
                 }
             };
 
-    private static final BiFunction<String, DialogueTree, ITextComponent> promptProvider =
+    private static final BiFunction<String, DialogueTree, Component> promptProvider =
             (name, tree) -> {
                 DialoguePrompt prompt = tree.getPrompt(name);
                 if (prompt != null) {
                     return prompt.getPromptLink();
                 } else {
-                    return new StringTextComponent(String.format("{prompt:%s}", name));
+                    return new TextComponent(String.format("{prompt:%s}", name));
                 }
             };
 
-    private static final BiFunction<String, DialogueTree, ITextComponent> itemProvider =
+    private static final BiFunction<String, DialogueTree, Component> itemProvider =
             (name, tree) -> {
                 ResourceLocation itemId = new ResourceLocation(name);
                 Item item = ForgeRegistries.ITEMS.getValue(itemId);
                 if (item != null) {
-                    return new TranslationTextComponent(item.getTranslationKey());
+                    return new TranslatableComponent(item.getDescriptionId());
                 } else {
-                    return new StringTextComponent(String.format("{item:%s}", name));
+                    return new TextComponent(String.format("{item:%s}", name));
                 }
             };
 
@@ -94,7 +94,7 @@ public class DialogueManager extends JsonReloadListener {
         putContextArgProvider("entity_name", entityNameProvider);
     }
 
-    public static void putContextArgProvider(String typeName, Function<DialogueContext, ITextComponent> func) {
+    public static void putContextArgProvider(String typeName, Function<DialogueContext, Component> func) {
         contextProviders.put(typeName, func);
     }
 
@@ -125,7 +125,7 @@ public class DialogueManager extends JsonReloadListener {
         return conditionDeserializers.get(conditionType).get();
     }
 
-    public static void putTextComponentProvider(String typeName, BiFunction<String, DialogueTree, ITextComponent> func) {
+    public static void putTextComponentProvider(String typeName, BiFunction<String, DialogueTree, Component> func) {
         textComponentProviders.put(typeName, func);
     }
 
@@ -141,8 +141,8 @@ public class DialogueManager extends JsonReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> objectIn,
-                         @Nullable IResourceManager resourceManagerIn,
-                         @Nullable IProfiler profilerIn) {
+                         @Nullable ResourceManager resourceManagerIn,
+                         @Nullable ProfilerFiller profilerIn) {
         trees.clear();
         for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
@@ -160,35 +160,35 @@ public class DialogueManager extends JsonReloadListener {
         event.addListener(this);
     }
 
-    private static ITextComponent handleTextProviderRequest(String request, DialogueTree tree) {
+    private static Component handleTextProviderRequest(String request, DialogueTree tree) {
         if (request.contains(":")) {
             String[] requestSplit = request.split(":", 2);
             if (textComponentProviders.containsKey(requestSplit[0])) {
                 return textComponentProviders.get(requestSplit[0]).apply(requestSplit[1], tree);
             } else {
-                return new StringTextComponent("{" + request + "}");
+                return new TextComponent("{" + request + "}");
             }
         } else {
-            return new StringTextComponent("{" + request + "}");
+            return new TextComponent("{" + request + "}");
         }
     }
 
-    public static ITextComponent parseDialogueMessage(String text, DialogueTree tree) {
+    public static Component parseDialogueMessage(String text, DialogueTree tree) {
         String parsing = text;
-        IFormattableTextComponent component = new StringTextComponent("");
+        MutableComponent component = new TextComponent("");
         while (!parsing.isEmpty()) {
             if (parsing.contains("{") && parsing.contains("}")) {
                 int index = parsing.indexOf("{");
                 int endIndex = parsing.indexOf("}");
-                component.appendString(parsing.substring(0, index));
+                component.append(parsing.substring(0, index));
                 String textProviderRequest = parsing.substring(index, endIndex + 1)
                         .replace("{", "")
                         .replace("}", "");
                 //handle request
-                component.appendSibling(handleTextProviderRequest(textProviderRequest, tree));
+                component.append(handleTextProviderRequest(textProviderRequest, tree));
                 parsing = parsing.substring(endIndex + 1);
             } else {
-                component.appendString(parsing);
+                component.append(parsing);
                 parsing = "";
             }
         }

@@ -6,10 +6,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.OptionalDynamic;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +35,12 @@ public class DialogueResponse {
 
     public DialogueResponse copy() {
         DialogueResponse newResponse = new DialogueResponse(getResponseNodeId());
-        INBT nbt = serialize(NBTDynamicOps.INSTANCE);
-        newResponse.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, nbt));
+        Tag nbt = serialize(NbtOps.INSTANCE);
+        newResponse.deserialize(new Dynamic<>(NbtOps.INSTANCE, nbt));
         return newResponse;
     }
 
-    public boolean doesMatchConditions(ServerPlayerEntity player, LivingEntity source) {
+    public boolean doesMatchConditions(ServerPlayer player, LivingEntity source) {
         return conditions.stream().allMatch(x -> x.checkCondition(player, source));
     }
 

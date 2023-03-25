@@ -1,20 +1,20 @@
 package com.chaosbuffalo.mkchat.capabilities;
 
 import com.chaosbuffalo.mkchat.MKChat;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Mod.EventBusSubscriber(modid = MKChat.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChatCapabilities {
     public static ResourceLocation PLAYER_DIALOGUE_CAP_ID = new ResourceLocation(MKChat.MODID,
             "player_dialogue_data");
@@ -22,23 +22,20 @@ public class ChatCapabilities {
             "npc_dialogue_data");
 
 
-    @CapabilityInject(IPlayerDialogue.class)
-    public static final Capability<IPlayerDialogue> PLAYER_DIALOGUE_CAPABILITY;
+    public static final Capability<IPlayerDialogue> PLAYER_DIALOGUE_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
 
-    @CapabilityInject(INpcDialogue.class)
-    public static final Capability<INpcDialogue> NPC_DIALOGUE_CAPABILITY;
 
-    static {
-        PLAYER_DIALOGUE_CAPABILITY = null;
-        NPC_DIALOGUE_CAPABILITY = null;
+    public static final Capability<INpcDialogue> NPC_DIALOGUE_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+
+
+    @SubscribeEvent
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.register(IPlayerDialogue.class);
+        event.register(INpcDialogue.class);
     }
 
-    public static void registerCapabilities() {
-        CapabilityManager.INSTANCE.register(IPlayerDialogue.class, new NBTStorage<>(), () -> null);
-        CapabilityManager.INSTANCE.register(INpcDialogue.class, new NBTStorage<>(), () -> null);
-    }
 
-    public abstract static class Provider<CapTarget, CapType extends INBTSerializable<CompoundNBT>> implements ICapabilitySerializable<CompoundNBT> {
+    public abstract static class Provider<CapTarget, CapType extends INBTSerializable<CompoundTag>> implements ICapabilitySerializable<CompoundTag> {
 
         private final CapType data;
         private final LazyOptional<CapType> capOpt;
@@ -63,33 +60,13 @@ public class ChatCapabilities {
         }
 
         @Override
-        public CompoundNBT serializeNBT() {
+        public CompoundTag serializeNBT() {
             return data.serializeNBT();
         }
 
         @Override
-        public void deserializeNBT(CompoundNBT nbt) {
+        public void deserializeNBT(CompoundTag nbt) {
             data.deserializeNBT(nbt);
-        }
-    }
-
-    public static class NBTStorage<T extends INBTSerializable<CompoundNBT>> implements Capability.IStorage<T> {
-
-        @Nullable
-        @Override
-        public INBT writeNBT(Capability<T> capability, T instance, Direction side) {
-            if (instance == null) {
-                return null;
-            }
-            return instance.serializeNBT();
-        }
-
-        @Override
-        public void readNBT(Capability<T> capability, T instance, Direction side, INBT nbt) {
-            if (nbt instanceof CompoundNBT && instance != null) {
-                CompoundNBT tag = (CompoundNBT) nbt;
-                instance.deserializeNBT(tag);
-            }
         }
     }
 }
