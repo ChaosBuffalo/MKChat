@@ -17,6 +17,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
+
 version = "0.15.1"
 if (System.getenv().RELEASE_MODE == null) {
     version += '-SNAPSHOT'

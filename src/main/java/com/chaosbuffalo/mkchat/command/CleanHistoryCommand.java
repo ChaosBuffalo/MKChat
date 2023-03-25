@@ -15,7 +15,7 @@ public class CleanHistoryCommand {
     }
 
     static int handleMessage(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        IPlayerDialogue.get(ctx.getSource().asPlayer()).ifPresent(IPlayerDialogue::cleanHistory);
+        IPlayerDialogue.get(ctx.getSource().getPlayerOrException()).ifPresent(IPlayerDialogue::cleanHistory);
         return Command.SINGLE_SUCCESS;
     }
 }
